@@ -3,32 +3,50 @@ import pandas as pd
 import random
 from app import app
 
-#app = Flask(__name__)
-#app.secret_key = 'http://127.0.0.1:5000'
 
-# Load the data
+app.secret_key = '123'
+
 df = pd.read_excel('data/dead_db.xlsx')
 my_list = df["Name"].tolist()
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'target_word' not in session:
-        session['target_word'] = random.choice(my_list)
-    target_word = session['target_word']
+    if 'guess_attempts' not in session:
+        session['guess_attempts'] = 0
+        session['guess_history'] = []
+        r = random.randint(0, len(df) - 1)
+        session['target_info'] = df.iloc[r].to_dict()
 
-    feedback = None
-    if request.method == 'POST':
-        guess = request.form.get('guess')
-        if guess in my_list:
-            feedback = "Correct! Or add more feedback here."
-            session.pop('target_word', None)
-    return render_template('index.html', feedback=feedback)
+    feedback = ''
+    if request.method == 'POST' and session['guess_attempts'] < 5:
+        guess_name = request.form.get('guess')
+        guessed_row = df[df['Name'].str.upper() == guess_name.upper()]
 
-def process_guess(guess, target_word):
-    if guess.upper() == target_word.upper():
-        return "Correct!"
-    else:
-        return "Try again"
+        if not guessed_row.empty:
+            guessed_row = guessed_row.iloc[0].to_dict()
+            gender_feedback = "✅" if guessed_row['gender'] == session['target_info']['gender'] else "❌"
+            session['guess_history'].append({'name': guess_name, 'gender_feedback': gender_feedback})
+            session['guess_attempts'] +=1
+            # more categories here
+        else:
+            feedback = "Game over"
+
+        if session['guess_attempts'] >= 5:
+            feedback = 'reset'
+
+        session.modified = True
+
+    return render_template('index.html', feedback=feedback, my_list=my_list, guess_history=session['guess_history'])
+
+@app.route('/reset', methods=['GET'])
+def reset():
+    # Reset game state
+    session.pop('guess_attempts', None)
+    session.pop('guess_history', None)
+    session.pop('target_info', None)
+    return redirect(url_for('index'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

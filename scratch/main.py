@@ -34,8 +34,7 @@ def handle_place(target_row, guess_row):
 def handle_person(target_row, guess_row):
     target_gender = target_row["gender"].iloc[0]
     target_domain = target_row["domain"].iloc[0]
-    guess_gender = guess_row["gender"].iloc[0]
-    guess_domain = guess_row["domain"].iloc[0]
+
 
     if target_gender == guess_gender:
         print(target_gender)

@@ -3,15 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Deadle</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h1>Guess the Historical Figure</h1>
-    <form method="POST">
-        <input type="text" name="guess" autocomplete="off" required>
+    <form method="post">
+        <input type="text" name="guess" list="name-options" autocomplete="off" required>
+        <datalist id="name-options">
+            {% for name in my_list %}
+            <option value="{{ name }}">
+            {% endfor %}
+        </datalist>
         <button type="submit">Guess</button>
     </form>
     {% if feedback %}
         <p>{{ feedback }}</p>
+    {% endif %}
+    <div id="guess-history">
+        {% for guess in guess_history %}
+            <p>Guess: {{ guess.name }} - Gender Feedback: {{ guess.gender_feedback }}</p>
+        {% endfor %}
+    </div>
+    {% if guess_history|length >= 5 %}
+        <button onclick="window.location.href='/reset';">Reset Game</button>
     {% endif %}
 </body>
 </html>

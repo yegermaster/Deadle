@@ -1,0 +1,41 @@
+/* style.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    text-align: center;
+    padding: 50px;
+}
+
+input[type="text"] {
+    font-size: 20px;
+    padding: 10px;
+    width: 300px;
+    margin-top: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    font-size: 20px;
+    padding: 10px 20px;
+    background-color: #005aee;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #003eaa;
+}
+
+datalist {
+    width: 300px;
+}
+
+p {
+    margin-top: 20px;
+    font-size: 20px;
+}

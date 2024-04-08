@@ -1,36 +1,57 @@
 /* style.css */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
+    font-family: 'Nunito', sans-serif;
+    background-color: #2D2D2D;
+    color: #E0E0E0;
     text-align: center;
     padding: 50px;
+    margin: 0;
 }
 
 input[type="text"] {
-    font-size: 20px;
+    font-size: 18px;
     padding: 10px;
-    width: 300px;
-    margin-top: 20px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    width: 80%;
+    max-width: 400px;
+    margin: 10px auto;
+    display: block;
+}
+
+input[type="text"] {
+    background-color: #404040;
+    color: #FFFFFF;
+    border: 2px solid #606060;
+    border-radius: 25px;
 }
 
 button {
-    font-size: 20px;
-    padding: 10px 20px;
-    background-color: #005aee;
-    color: white;
+    background-color: #007BFF;
+    color: #FFFFFF;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    margin-top: 20px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #003eaa;
+    background-color: #0056b3;
 }
 
+guess-history{
+    margin-top: 30px;
+}
+
+guess-history p{
+    background-color: #333333;
+    color: #FFFFFF;
+    padding: 10px;
+    border-radius: 15px;
+    margin: 10px auto;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+}
 datalist {
     width: 300px;
 }
@@ -39,3 +60,6 @@ p {
     margin-top: 20px;
     font-size: 20px;
 }
+
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');

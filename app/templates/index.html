@@ -21,7 +21,14 @@
     {% endif %}
     <div id="guess-history">
         {% for guess in guess_history %}
-            <p>Guess: {{ guess.name }} - Gender Feedback: {{ guess.gender_feedback }}</p>
+            <p>Name: {{ guess.name }}
+                - Gender: {{ guess.gender_feedback }}
+                - City: {{ guess.city_feedback  }}
+                - Country: {{ guess.country_feedback  }}
+                - Continent: {{ guess.continent_feedback  }}
+                - Death: {{ guess.death_feedback  }}
+                - Birth: {{ guess.birth_feedback  }}
+                - Domain: {{ guess.domain_feedback  }}</p>
         {% endfor %}
     </div>
     {% if guess_history|length >= 5 %}

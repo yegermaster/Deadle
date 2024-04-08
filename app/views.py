@@ -26,7 +26,26 @@ def index():
         if not guessed_row.empty:
             guessed_row = guessed_row.iloc[0].to_dict()
             gender_feedback = "✅" if guessed_row['gender'] == session['target_info']['gender'] else "❌"
-            session['guess_history'].append({'name': guess_name, 'gender_feedback': gender_feedback})
+            city_feedback = "✅" if guessed_row['birthcity'] == session['target_info']['birthcity'] else "❌"
+            country_feedback = "✅" if guessed_row['countryName'] == session['target_info']['countryName'] else "❌"
+            continent_feedback = "✅" if guessed_row['continentName'] == session['target_info']['continentName'] else "❌"
+            domain_feedback = "✅" if guessed_row['domain'] == session['target_info']['domain'] else "❌"
+            death_feedback = "✅" if guessed_row['deathyear'] == session['target_info']['deathyear'] else "❌"
+            birth_feedback = "✅" if guessed_row['birthyear'] == session['target_info']['birthyear'] else "❌"
+
+
+
+            session['guess_history'].append(
+                {'name': guess_name,
+                 'gender_feedback': gender_feedback,
+                 'city_feedback': city_feedback,
+                 'country_feedback': country_feedback,
+                 'continent_feedback': continent_feedback,
+                 'domain_feedback': domain_feedback,
+                 'death_feedback': death_feedback,
+                 'birth_feedback': birth_feedback
+                 })
+
             session['guess_attempts'] +=1
             # more categories here
         else:

@@ -1,8 +1,5 @@
 import random
-import numpy
 import pandas as pd
-
-import constants as c
 
 
 def handle_age(target_row, guess_row):

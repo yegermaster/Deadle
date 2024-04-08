@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deadle</title>
+</head>
+<body>
+    <h1>Guess the Historical Figure</h1>
+    <form method="POST">
+        <input type="text" name="guess" autocomplete="off" required>
+        <button type="submit">Guess</button>
+    </form>
+    {% if feedback %}
+        <p>{{ feedback }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,6 +1,4 @@
-index = 11339
-
-"Id;" \
+"""Id;" \
 "en_curid;" \
 "Name;" \
 "NameURL;" \
@@ -41,4 +39,4 @@ index = 11339
 "degree;" \
 "clustering;" \
 "eigenCentrality;" \
-"BCI"
+"BCI"""

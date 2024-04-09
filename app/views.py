@@ -4,7 +4,7 @@ import random
 from app import app
 import os
 app.secret_key = '123'
-from app import image_load
+from app import helper
 
 df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
 my_list = df["Name"].tolist()
@@ -37,7 +37,7 @@ def index():
             # Construct the full path to the 'img1.jpg' file within the 'img' directory
             image_path = os.path.join('app', 'static', 'img', image_filename)
             if not os.path.exists(image_path):
-                image_load.download_image(wiki_url)
+                helper.download_image(wiki_url)
             session['image_filename'] = image_filename
             feedback += " The historical figure was: " + session['target_info']['Name']
         elif session['guess_attempts'] > 5:
@@ -110,8 +110,17 @@ def generate_feedback(guessed_row):
 
     gender_feedback = f"✅ {guessed_row['gender']}" if guessed_row['gender'] == session['target_info']['gender'] else f"❌ {guessed_row['gender']}"
 
+    to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
+    from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
 
-    city_feedback = f"✅ {guessed_row['birthcity']}" if guessed_row['birthcity'] == session['target_info']['birthcity'] else f"❌ {guessed_row['birthcity']}"
+    direction = helper.get_direction(from_coord, to_coord)
+    icon_filename = direction + '.jpg'
+    icon_path = url_for('static', filename=f'img/arrows/{icon_filename}')
+
+    city_feedback = f"<img src='{icon_path}' alt='{direction}'> - {guessed_row['birthcity']}" if guessed_row[
+                                                                                                     'birthcity'] == \
+                                                                                                 session['target_info'][
+                                                                                                     'birthcity'] else f"<img src='{icon_path}' alt='{direction}'>, {guessed_row['birthcity']}"
     country_feedback = f"✅ {guessed_row['countryName']}" if guessed_row['countryName'] == session['target_info']['countryName'] else f"❌{guessed_row['countryName']}"
     continent_feedback = f"✅{guessed_row['continentName']}" if guessed_row['continentName'] == session['target_info']['continentName'] else f"❌{guessed_row['continentName']}"
 
@@ -133,3 +142,4 @@ def generate_feedback(guessed_row):
 
 if __name__ == "__main__":
     app.run(debug=True)
+

@@ -4,51 +4,55 @@
     <meta charset="UTF-8">
     <title>Deadle</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Add your existing CSS here and consider the following enhancements */
+        .guess-history-entry { margin-bottom: 20px; }
+        .guess-history-detail { margin-left: 20px; }
+    </style>
 </head>
 <body>
     <div class="container">
-    <h1>Guess the Historical Figure</h1>
-    <form method="post" class="guess-form">
-        <input type="text" name="guess" list="name-options" autocomplete="off" required>
-        <datalist id="name-options">
-            {% for name in my_list %}
-            <option value="{{ name }}">
+        <h1>Guess the Historical Figure</h1>
+        <form method="post" class="guess-form">
+            <input type="text" name="guess" list="name-options" autocomplete="off" required>
+            <datalist id="name-options">
+                {% for name in my_list %}
+                <option value="{{ name }}">
+                {% endfor %}
+            </datalist>
+            <button type="submit">Guess</button>
+        </form>
+        {% if feedback %}
+            <p>{{ feedback|safe }}</p>
+        {% endif %}
+            {% for guess in guess_history %}
+                <div class="guess-history-entry">
+                    <p>{{ guess.name }}</p>
+                    <p class="guess-history-detail">Death: {{ guess.death_feedback|safe }}</p>
+                    <p class="guess-history-detail">Gender and Domain: {{ guess.gender_feedback|safe }}, {{ guess.domain_feedback|safe }}</p>
+                    <p class="guess-history-detail">Country and Continent: {{ guess.country_feedback|safe }}, {{ guess.continent_feedback|safe }}</p>
+                    <p class="guess-history-detail">City and Direction: <img src="{{ guess.city_feedback|safe }}" alt="Direction">, {{ guess.city_feedback|safe }}</p>
+                </div>
             {% endfor %}
-        </datalist>
-        <button type="submit">Guess</button>
-    </form>
-    {% if feedback %}
-        <p>{{ feedback }}</p>
-    {% endif %}
-    <div id="guess-history">
-        {% for guess in guess_history %}
-            <p>{{ guess.name }}
-                - Gender: {{ guess.gender_feedback }}
-                - City: {{ guess.city_feedback  }}
-                - Country: {{ guess.country_feedback  }}
-                - Continent: {{ guess.continent_feedback  }}
-                - Death: {{ guess.death_feedback  }}
-                - Domain: {{ guess.domain_feedback  }}</p>
-        {% endfor %}
-    </div>
-    {% if session.get('reveal', False) %}
-        <div class="reveal-info">
-            <h2>The historical figure was:</h2>
-            <p>Name: {{ session['target_info']['Name'] }}</p>
-            <p>Gender: {{ session['target_info']['gender'] }}</p>
-            <p>City: {{ session['target_info']['birthcity'] }}</p>
-            <p>Country: {{ session['target_info']['countryName'] }}</p>
-            <p>Continent: {{ session['target_info']['continentName'] }}</p>
-            <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
-            <p>Domain: {{ session['target_info']['domain'] }}</p>
-            {% if image_filename %}
-            <img src="{{ url_for('static', filename='img/' + image_filename) }}" alt="Historical Figure" />
-            {% endif %}
         </div>
-    {% endif %}
-
-    {% if guess_history|length >= 5 %}
-        <button onclick="window.location.href='/reset';">Reset Game</button>
-    {% endif %}
+        {% if session.get('reveal', False) %}
+            <div class="reveal-info">
+                <h2>The historical figure was:</h2>
+                <p>Name: {{ session['target_info']['Name'] }}</p>
+                <p>Gender: {{ session['target_info']['gender'] }}</p>
+                <p>City: {{ session['target_info']['birthcity'] }}</p>
+                <p>Country: {{ session['target_info']['countryName'] }}</p>
+                <p>Continent: {{ session['target_info']['continentName'] }}</p>
+                <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
+                <p>Domain: {{ session['target_info']['domain'] }}</p>
+                {% if image_filename %}
+                <img src="{{ url_for('static', filename='img/' + image_filename) }}" alt="Historical Figure" />
+                {% endif %}
+            </div>
+        {% endif %}
+        {% if guess_history|length >= 5 %}
+            <button onclick="window.location.href='/reset';">Reset Game</button>
+        {% endif %}
+    </div>
 </body>
 </html>

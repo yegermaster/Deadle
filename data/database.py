@@ -5,6 +5,7 @@ import pandas as pd
 r = random.randint(0, 11339)
 
 df = pd.read_csv("Nodes.csv", delimiter=';', on_bad_lines='skip')
+df.drop_duplicates(subset=["Name"], inplace=True)
 temp_db = pd.DataFrame(columns=[
     'Id', 'Name', 'Link', 'birthcity', 'countryName', 'longitude',
     'latitude', 'continentName', 'birthyear', 'deathyear', 'agespan',
@@ -25,13 +26,15 @@ temp_db["gender"] = df["gender"]
 temp_db["occupation"] = df["occupation"]
 temp_db["industry"] = df["industry"]
 temp_db["domain"] = df["domain"]
+temp_db["longitude"] = df["longitude"]
+temp_db["latitude"] = df["latitude"]
 
 
 
 if __name__ == "__main__":
     alive_db = temp_db.loc[temp_db['deathyear'] == 2018]
     dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
-    #dead_db.to_excel('dead_db.xlsx')
+    dead_db.to_excel('dead_db.xlsx')
 
     unique_countries = df['countryName'].nunique()
     unique_continents = df['continentName'].nunique()
@@ -63,4 +66,3 @@ if __name__ == "__main__":
     print(f'Newest birth year: {newest_birth_year}, Name: {newest_birth_name}')
     print(f'Oldest death year: {oldest_death_year}, Name: {oldest_death_name}')
     print(f'Newest death year: {newest_death_year}, Name: {newest_death_name}')
-

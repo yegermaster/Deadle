@@ -11,11 +11,14 @@ my_list = df["Name"].tolist()
 
 @app.route('/reset')
 def reset():
+    """Route to reset the game session and redirects to the index page"""
     session.clear()
     return redirect(url_for('index'))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """Main route.Initializes the game.
+     Sends feedback and renders the page."""
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
 
@@ -36,6 +39,7 @@ def index():
     return render_template('index.html', feedback=feedback, my_list=my_list, guess_history=session.get('guess_history', []))
 
 def initialize_game():
+    """Initializes the game with random choice"""
     session['guess_attempts'] = 0
     session['guess_history'] = []
     r = random.randint(0, len(df) - 1)
@@ -43,6 +47,7 @@ def initialize_game():
 
 
 def process_guess(guess_name):
+    """Processes a single guess and handling the attempts"""
     if session['guess_attempts'] >=5:
         reveal_info = {
             'reveal': True,
@@ -72,6 +77,7 @@ def process_guess(guess_name):
         return 'Max attempts reached. Reset to start again/'
 
 def death_feedback(guessed_row):
+    """Generates feedback for death year"""
     guessed_death = int(guessed_row['deathyear'])
     chosen_death = int(session['target_info']['deathyear'])
 
@@ -86,6 +92,7 @@ def death_feedback(guessed_row):
 
 
 def generate_feedback(guessed_row):
+    """Generate feedback from the database compared to the guess"""
     guess_name = guessed_row['Name']
 
     gender_feedback = f"✅ {guessed_row['gender']}" if guessed_row['gender'] == session['target_info']['gender'] else f"❌ {guessed_row['gender']}"

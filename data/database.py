@@ -30,5 +30,37 @@ temp_db["domain"] = df["domain"]
 
 if __name__ == "__main__":
     alive_db = temp_db.loc[temp_db['deathyear'] == 2018]
-    #dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
+    dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
     #dead_db.to_excel('dead_db.xlsx')
+
+    unique_countries = df['countryName'].nunique()
+    unique_continents = df['continentName'].nunique()
+    unique_cities = df['birthcity'].nunique()
+
+    unique_occupation = df['occupation'].nunique()
+    unique_industry = df['industry'].nunique()
+    unique_domain = df['domain'].nunique()
+
+    oldest_birth_year = dead_db['birthyear'].min()
+    newest_birth_year = dead_db['birthyear'].max()
+    oldest_death_year = dead_db['deathyear'].min()
+    newest_death_year = dead_db['deathyear'].max()
+
+    oldest_birth_name = dead_db[dead_db['birthyear'] == oldest_birth_year]['Name'].iloc[0]
+    newest_birth_name = dead_db[dead_db['birthyear'] == newest_birth_year]['Name'].iloc[0]
+    oldest_death_name = dead_db[dead_db['deathyear'] == oldest_death_year]['Name'].iloc[0]
+    newest_death_name = dead_db[dead_db['deathyear'] == newest_death_year]['Name'].iloc[0]
+
+    print(f'Unique countries: {unique_countries}')
+    print(f'Unique continents: {unique_continents}')
+    print(f'Unique cities: {unique_cities}')
+    print(f'Unique occupation: {unique_occupation}')
+    print(f'Unique industry: {unique_industry}')
+    print(f'Unique domain: {unique_domain}')
+    print(f'Alive in 2018: {len(alive_db)}')
+    print(f'Dead (all other years): {len(dead_db)}')
+    print(f'Oldest birth year: {oldest_birth_year}, Name: {oldest_birth_name}')
+    print(f'Newest birth year: {newest_birth_year}, Name: {newest_birth_name}')
+    print(f'Oldest death year: {oldest_death_year}, Name: {oldest_death_name}')
+    print(f'Newest death year: {newest_death_year}, Name: {newest_death_name}')
+

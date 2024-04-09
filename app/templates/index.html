@@ -6,8 +6,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <div class="container">
     <h1>Guess the Historical Figure</h1>
-    <form method="post">
+    <form method="post" class="guess-form">
         <input type="text" name="guess" list="name-options" autocomplete="off" required>
         <datalist id="name-options">
             {% for name in my_list %}
@@ -21,16 +22,28 @@
     {% endif %}
     <div id="guess-history">
         {% for guess in guess_history %}
-            <p>Name: {{ guess.name }}
+            <p>{{ guess.name }}
                 - Gender: {{ guess.gender_feedback }}
                 - City: {{ guess.city_feedback  }}
                 - Country: {{ guess.country_feedback  }}
                 - Continent: {{ guess.continent_feedback  }}
                 - Death: {{ guess.death_feedback  }}
-                - Birth: {{ guess.birth_feedback  }}
                 - Domain: {{ guess.domain_feedback  }}</p>
         {% endfor %}
     </div>
+    {% if session.get('reveal', False) %}
+        <div class="reveal-info">
+            <h2>The historical figure was:</h2>
+            <p>Name: {{ session['target_info']['Name'] }}</p>
+            <p>Gender: {{ session['target_info']['gender'] }}</p>
+            <p>City: {{ session['target_info']['birthcity'] }}</p>
+            <p>Country: {{ session['target_info']['countryName'] }}</p>
+            <p>Continent: {{ session['target_info']['continentName'] }}</p>
+            <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
+            <p>Domain: {{ session['target_info']['domain'] }}</p>
+        </div>
+    {% endif %}
+
     {% if guess_history|length >= 5 %}
         <button onclick="window.location.href='/reset';">Reset Game</button>
     {% endif %}

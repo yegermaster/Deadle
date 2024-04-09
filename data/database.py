@@ -30,5 +30,5 @@ temp_db["domain"] = df["domain"]
 
 if __name__ == "__main__":
     alive_db = temp_db.loc[temp_db['deathyear'] == 2018]
-    dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
-    dead_db.to_excel('dead_db.xlsx')
+    #dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
+    #dead_db.to_excel('dead_db.xlsx')

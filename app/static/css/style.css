@@ -1,65 +1,77 @@
-/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
 body {
     font-family: 'Nunito', sans-serif;
-    background-color: #2D2D2D;
+    background-color: #1A1A2E;
     color: #E0E0E0;
-    text-align: center;
-    padding: 50px;
     margin: 0;
+    padding: 20px;
 }
 
-input[type="text"] {
-    font-size: 18px;
-    padding: 10px;
-    width: 80%;
-    max-width: 400px;
-    margin: 10px auto;
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.guess-form input[type="text"] {
+    font-size: 16px;
+    padding: 8px;
+    width: 70%;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.guess-form button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 20px;
+}
+
+.feedback, .guess-card {
+    background-color: #333;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 14px;
+}
+
+.guess-card {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+
+.guess-card span {
     display: block;
+    margin: 5px 0;
 }
 
-input[type="text"] {
-    background-color: #404040;
-    color: #FFFFFF;
-    border: 2px solid #606060;
-    border-radius: 25px;
-}
-
-button {
+.reset-button {
     background-color: #007BFF;
     color: #FFFFFF;
+    padding: 10px 20px;
+    font-size: 18px;
     border: none;
-    border-radius: 25px;
+    border-radius: 20px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin-top: 20px;
 }
 
-button:hover {
+.reset-button:hover {
     background-color: #0056b3;
 }
 
-guess-history{
-    margin-top: 30px;
+@media (max-width: 600px) {
+    .guess-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
 }
-
-guess-history p{
-    background-color: #333333;
-    color: #FFFFFF;
-    padding: 10px;
-    border-radius: 15px;
-    margin: 10px auto;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-
-}
-datalist {
-    width: 300px;
-}
-
-p {
-    margin-top: 20px;
-    font-size: 20px;
-}
-
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');

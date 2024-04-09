@@ -51,7 +51,7 @@ def load_wiki_image(image_url, wiki_url, headers):
         image_response.raise_for_status()
 
         base_dir = os.path.abspath('')
-        image_path = os.path.join(base_dir, 'app', 'static', 'img')
+        image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
         image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg')

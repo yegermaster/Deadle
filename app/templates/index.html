@@ -12,6 +12,7 @@
 </head>
 <body>
     <div class="container">
+    <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="logo">
         <h1>Guess the Historical Figure</h1>
         <form method="post" class="guess-form">
             <input type="text" name="guess" list="name-options" autocomplete="off" required>

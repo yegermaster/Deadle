@@ -2,9 +2,9 @@ from flask import render_template, request, redirect, url_for, session
 import pandas as pd
 import random
 from app import app
-
-
+import os
 app.secret_key = '123'
+from app import image_load
 
 df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
 my_list = df["Name"].tolist()
@@ -31,12 +31,25 @@ def index():
         if session['guess_attempts'] == 5 or game_over:
             # When it's the last guess or the game is over, reveal the answer
             session['reveal'] = True
+            wiki_url = session['target_info']['Link']
+            image_filename =  wiki_url.split('/')[-1] + '.jpg'
+
+            # Construct the full path to the 'img1.jpg' file within the 'img' directory
+            image_path = os.path.join('app', 'static', 'img', image_filename)
+            if not os.path.exists(image_path):
+                image_load.download_image(wiki_url)
+            session['image_filename'] = image_filename
             feedback += " The historical figure was: " + session['target_info']['Name']
         elif session['guess_attempts'] > 5:
             # Should not happen, but just in case
             feedback = "Max attempts reached. Please reset to start again."
 
-    return render_template('index.html', feedback=feedback, my_list=my_list, guess_history=session.get('guess_history', []))
+    return render_template('index.html',
+                           feedback=feedback,
+                           my_list=my_list,
+                           guess_history=session.get('guess_history', []),
+                           image_filename = session.get('image_filename', '')
+                           )
 
 def initialize_game():
     """Initializes the game with random choice"""

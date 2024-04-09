@@ -41,6 +41,9 @@
             <p>Continent: {{ session['target_info']['continentName'] }}</p>
             <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
             <p>Domain: {{ session['target_info']['domain'] }}</p>
+            {% if image_filename %}
+            <img src="{{ url_for('static', filename='img/' + image_filename) }}" alt="Historical Figure" />
+            {% endif %}
         </div>
     {% endif %}
 

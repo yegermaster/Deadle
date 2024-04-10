@@ -7,7 +7,7 @@ from app import helper
 
 app.secret_key = '123'
 
-df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
+df = pd.read_excel('dead_db.xlsx', dtype={'deathyear': 'Int64'})
 my_list = df["Name"].tolist()
 
 @app.route('/reset')

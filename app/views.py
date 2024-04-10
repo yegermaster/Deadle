@@ -3,8 +3,9 @@ import pandas as pd
 import random
 from app import app
 import os
-app.secret_key = '123'
 from app import helper
+
+app.secret_key = '123'
 
 df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
 my_list = df["Name"].tolist()
@@ -17,33 +18,30 @@ def reset():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """Main route.Initializes the game.
-     Sends feedback and renders the page."""
+    """
+    Main route.
+    Initializes the game and Sends feedback and renders the page.
+    """
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
 
     feedback = ''
-    game_over = False
-    if request.method == 'POST':
+    if request.method == 'POST': # when the player make a guess
         guess_name = request.form.get('guess')
         if session['guess_attempts'] < 5:
             feedback = process_guess(guess_name)
-        if session['guess_attempts'] == 5 or game_over:
-            # When it's the last guess or the game is over, reveal the answer
+        if session['guess_attempts'] == 5:
             session['reveal'] = True
+            # deal with image
             wiki_url = session['target_info']['Link']
             image_filename =  wiki_url.split('/')[-1] + '.jpg'
-
-            # Construct the full path to the 'img1.jpg' file within the 'img' directory
             image_path = os.path.join('app', 'static', 'img', image_filename)
             if not os.path.exists(image_path):
                 helper.download_image(wiki_url)
             session['image_filename'] = image_filename
-            feedback += " The historical figure was: " + session['target_info']['Name']
-        elif session['guess_attempts'] > 5:
-            # Should not happen, but just in case
-            feedback = "Max attempts reached. Please reset to start again."
 
+            feedback += " The historical figure was: " + session['target_info']['Name']
+    # sends the information to the html file (frontend)
     return render_template('index.html',
                            feedback=feedback,
                            my_list=my_list,
@@ -55,39 +53,24 @@ def initialize_game():
     """Initializes the game with random choice"""
     session['guess_attempts'] = 0
     session['guess_history'] = []
-    r = random.randint(0, len(df) - 1)
+    r = random.randint(0, len(df) - 1) # choosing randomly number from the list
     session['target_info'] = df.iloc[r].to_dict()
 
 
 def process_guess(guess_name):
     """Processes a single guess and handling the attempts"""
-    if session['guess_attempts'] >=5:
-        reveal_info = {
-            'reveal': True,
-            'target_name': session['target_info']['Name'],
-            'target_gender': session['target_info']['gender'],
-            'target_city': session['target_info']['birthcity'],
-            'target_country': session['target_info']['countryName'],
-            'target_continent': session['target_info']['continentName'],
-            'target_death': int(session['target_info']['deathyear']),
-            'target_domain': session['target_info']['domain']
-        }
-        session['reveal_info'] = reveal_info
-        return 'Game over. please reset to start a new game'
-
     guessed_row = df[df['Name'].str.upper() == guess_name.upper()]
     if guessed_row.empty:
         return 'Name not in list. Try again'
 
-
-    guessed_row = guessed_row.iloc[0].to_dict()
     session['guess_attempts'] += 1
+    guessed_row = guessed_row.iloc[0].to_dict()
     feedback = generate_feedback(guessed_row)
     session['guess_history'].append(feedback)
     session.modified = True
 
     if session['guess_attempts'] >= 5:
-        return 'Max attempts reached. Reset to start again/'
+        return 'Max attempts. Reset to start again '
 
 def death_feedback(guessed_row):
     """Generates feedback for death year"""
@@ -103,38 +86,37 @@ def death_feedback(guessed_row):
 
     return death_feedback
 
+def direction_feedback(guessed_row):
+    to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
+    from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
+    direction = helper.get_direction(from_coord, to_coord)
+    icon_filename = direction + '.png'
+    icon_path = url_for('static', filename=f'img/arrows/{icon_filename}') # creating the path to the correct direction
+    direction_image = f"<img src='{icon_path}' alt='{direction}'>"
+    return direction_image
+
+
 
 def generate_feedback(guessed_row):
     """Generate feedback from the database compared to the guess"""
     guess_name = guessed_row['Name']
-
-    gender_feedback = f"✅ {guessed_row['gender']}" if guessed_row['gender'] == session['target_info']['gender'] else f"❌ {guessed_row['gender']}"
-
-    to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
-    from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
-
-    direction = helper.get_direction(from_coord, to_coord)
-    icon_filename = direction + '.png'
-    icon_path = url_for('static', filename=f'img/arrows/{icon_filename}')
-
     city_name = guessed_row['birthcity']
-    direction_image = f"<img src='{icon_path}' alt='{direction}'>"
-
+    direction_image = direction_feedback(guessed_row)
+    gender_feedback = f"✅ {guessed_row['gender']}" if guessed_row['gender'] == session['target_info']['gender'] else f"❌ {guessed_row['gender']}"
     country_feedback = f"✅ {guessed_row['countryName']}" if guessed_row['countryName'] == session['target_info']['countryName'] else f"❌{guessed_row['countryName']}"
     continent_feedback = f"✅{guessed_row['continentName']}" if guessed_row['continentName'] == session['target_info']['continentName'] else f"❌{guessed_row['continentName']}"
-
-    domain_feedback = f"✅ {guessed_row['domain']}" if guessed_row['domain'] == session['target_info']['domain'] else f"❌{ guessed_row['domain']}"
+    occupation_feedback = f"✅ {guessed_row['occupation']}" if guessed_row['occupation'] == session['target_info']['occupation'] else f"❌{ guessed_row['occupation']}"
 
     death_feedback_result = death_feedback(guessed_row)
 
     feedback = {
         'name': guess_name,
         'gender_feedback': gender_feedback,
-        'city_name': city_name,
+        'city_name': city_name.lower(),
         'direction_image': direction_image,
-        'country_feedback': country_feedback,
-        'continent_feedback': continent_feedback,
-        'domain_feedback': domain_feedback,
+        'country_feedback': country_feedback.lower(),
+        'continent_feedback': continent_feedback.lower(),
+        'occupation_feedback': occupation_feedback.lower(),
         'death_feedback': death_feedback_result,
          }
 
@@ -143,4 +125,3 @@ def generate_feedback(guessed_row):
 
 if __name__ == "__main__":
     app.run(debug=True)
-

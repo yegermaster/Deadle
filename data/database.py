@@ -2,8 +2,7 @@ import random
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-
-r = random.randint(0, 11339)
+from app import helper
 
 df = pd.read_csv("Nodes.csv", delimiter=';', on_bad_lines='skip')
 df.drop_duplicates(subset=["Name"], inplace=True)
@@ -30,11 +29,22 @@ temp_db["domain"] = df["domain"]
 temp_db["longitude"] = df["longitude"]
 temp_db["latitude"] = df["latitude"]
 
-
-
 if __name__ == "__main__":
+    print(helper.get_cords('paris'))
     alive_db = temp_db.loc[temp_db['deathyear'] == 2018]
     dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
+    df = dead_db
+
+    for index, row in df.iterrows():
+        if pd.isna(row['latitude']) or pd.isna(row['longitude']) or row['latitude'] == "" or row['longitude'] == "":
+            cords = helper.get_cords(row['birthcity'])
+            if cords is not None:
+                lat, lon = cords
+                df.at[index, 'latitude'] = lat
+                df.at[index, 'longitude'] = lon
+            else:
+                print(f"no coords found for {row['birthcity']}")
+
     dead_db.to_excel('dead_db.xlsx')
 
     unique_countries = df['countryName'].nunique()

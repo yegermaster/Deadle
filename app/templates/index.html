@@ -30,7 +30,7 @@
                 <div class="guess-history-entry">
                     <p>{{ guess.name }}</p>
                     <p class="guess-history-detail">Death: {{ guess.death_feedback|safe }}</p>
-                    <p class="guess-history-detail">Gender and Domain: {{ guess.gender_feedback|safe }}, {{ guess.domain_feedback|safe }}</p>
+                    <p class="guess-history-detail">Gender and Occupation: {{ guess.gender_feedback|safe }}, {{ guess.occupation_feedback|safe }}</p>
                     <p class="guess-history-detail">Country and Continent: {{ guess.country_feedback|safe }}, {{ guess.continent_feedback|safe }}</p>
                     <p class="guess-history-detail">
                         City and Direction: {{ guess.direction_image|safe }}, {{ guess.city_name }}
@@ -43,11 +43,11 @@
                 <h2>The historical figure was:</h2>
                 <p>Name: {{ session['target_info']['Name'] }}</p>
                 <p>Gender: {{ session['target_info']['gender'] }}</p>
-                <p>City: {{ session['target_info']['birthcity'] }}</p>
-                <p>Country: {{ session['target_info']['countryName'] }}</p>
-                <p>Continent: {{ session['target_info']['continentName'] }}</p>
+                <p>City: {{ session['target_info']['birthcity'].lower() }}</p>
+                <p>Country: {{ session['target_info']['countryName'].lower() }}</p>
+                <p>Continent: {{ session['target_info']['continentName'].lower() }}</p>
                 <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
-                <p>Domain: {{ session['target_info']['domain'] }}</p>
+                <p>Occupation: {{ session['target_info']['occupation'].lower() }}</p>
                 {% if session.get('image_filename') %}
                     <img src="{{ url_for('static', filename='img/wiki_img/' + session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
                 {% endif %}

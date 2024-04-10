@@ -39,14 +39,15 @@ source venv/bin/activate`
 Ensure you have Python 3.10 or later installed on your system. This game uses Flask, so familiarity with Flask and Python web development is helpful.
 
 ## Data
-
-The dataset has more than 6500 historical figures, with representation from 195 countries across all 7 continents,
-and spans over 5,000 cities.
-The data brings together an array of 88 distinct occupations,
-27 different industries and 8 different domains of human activity including arts,
+There was alot of work to be done on the database (credit in here).
+For the start, there were 11,340 different figures in it, around 6500 dead and 4500 alive.
+Those figures where from 195 countries and over 5,000 cities.
+Some of those cities had latitude and longitude values, and some needed to be manually added.
+The data also have for each historic figure one of 88 distinct occupations,
+27 industries and 8 different domains of human activity including arts,
 sports, science & technology, and more.
 
-The datasets include including figures that were born as early as 3500 BCE and those who died as late as 2017.
+The datasets include figures that were born as early as 3500 BCE and those who died as late as 2017.
 This rich timeline offers players a chance
 to guess among more than 6500 historical figures who have left their mark on the world.
 Each guess is an opportunity to learn and connect with the legacies of these remarkable individuals.

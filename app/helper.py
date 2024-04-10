@@ -1,8 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import requests
+
 
 def download_image(wiki_url):
+    """Downloads the main image from wikipedia url"""
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
         'Referer': wiki_url
@@ -30,7 +34,7 @@ def download_image(wiki_url):
     try:
         soup = BeautifulSoup(response.text, 'html.parser')
         infobox = soup.find('table', class_='infobox')
-        image_tag = infobox.find('img') if infobox else soup.find('img')
+        image_tag = infobox.find('img') if infobox else soup.find('img') # searching for the imag in the html of the wiki link
         if not image_tag or not image_tag.get('src'):
             print("No image found")
             return
@@ -41,7 +45,7 @@ def download_image(wiki_url):
             domain = "https://www.wikipedia.org"
             image_url = domain + image_url
 
-        load_wiki_image(image_url, wiki_url, headers)
+        load_wiki_image(image_url, wiki_url, headers) # downloading the image
     except Exception as e:
         print(f"An error occurred while processing the image: {e}")
 
@@ -54,7 +58,7 @@ def load_wiki_image(image_url, wiki_url, headers):
         image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
-        image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg')
+        image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg') # saving the image with it's own name
 
         with open(image_name, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=128):
@@ -94,6 +98,16 @@ def get_direction(from_coord, to_coord):
         return 'NW'
     return 'Unknown'
 
+def get_cords(city):
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={city}&limit=1"
+    response = requests.get(url)
+    data = response.json()
+    if data:
+        lat = data[0]['lat']
+        lon = data[0]['lon']
+        return lon, lat
+    else:
+        return None
 
 if __name__ == '__main__':
-    pass
+    print(get_cords(('KHORASAN')))

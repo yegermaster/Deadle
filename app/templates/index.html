@@ -32,7 +32,9 @@
                     <p class="guess-history-detail">Death: {{ guess.death_feedback|safe }}</p>
                     <p class="guess-history-detail">Gender and Domain: {{ guess.gender_feedback|safe }}, {{ guess.domain_feedback|safe }}</p>
                     <p class="guess-history-detail">Country and Continent: {{ guess.country_feedback|safe }}, {{ guess.continent_feedback|safe }}</p>
-                    <p class="guess-history-detail">City and Direction: <img src="{{ guess.city_feedback|safe }}" alt="Direction">, {{ guess.city_feedback|safe }}</p>
+                    <p class="guess-history-detail">
+                        City and Direction: {{ guess.direction_image|safe }}, {{ guess.city_name }}
+                    </p>
                 </div>
             {% endfor %}
         </div>
@@ -46,11 +48,12 @@
                 <p>Continent: {{ session['target_info']['continentName'] }}</p>
                 <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
                 <p>Domain: {{ session['target_info']['domain'] }}</p>
-                {% if image_filename %}
-                <img src="{{ url_for('static', filename='img/' + image_filename) }}" alt="Historical Figure" />
+                {% if session.get('image_filename') %}
+                    <img src="{{ url_for('static', filename='img/wiki_img/' + session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
                 {% endif %}
             </div>
         {% endif %}
+
         {% if guess_history|length >= 5 %}
             <button onclick="window.location.href='/reset';">Reset Game</button>
         {% endif %}

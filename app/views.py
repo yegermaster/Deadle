@@ -114,13 +114,12 @@ def generate_feedback(guessed_row):
     from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
 
     direction = helper.get_direction(from_coord, to_coord)
-    icon_filename = direction + '.jpg'
+    icon_filename = direction + '.png'
     icon_path = url_for('static', filename=f'img/arrows/{icon_filename}')
 
-    city_feedback = f"<img src='{icon_path}' alt='{direction}'> - {guessed_row['birthcity']}" if guessed_row[
-                                                                                                     'birthcity'] == \
-                                                                                                 session['target_info'][
-                                                                                                     'birthcity'] else f"<img src='{icon_path}' alt='{direction}'>, {guessed_row['birthcity']}"
+    city_name = guessed_row['birthcity']
+    direction_image = f"<img src='{icon_path}' alt='{direction}'>"
+
     country_feedback = f"✅ {guessed_row['countryName']}" if guessed_row['countryName'] == session['target_info']['countryName'] else f"❌{guessed_row['countryName']}"
     continent_feedback = f"✅{guessed_row['continentName']}" if guessed_row['continentName'] == session['target_info']['continentName'] else f"❌{guessed_row['continentName']}"
 
@@ -128,13 +127,15 @@ def generate_feedback(guessed_row):
 
     death_feedback_result = death_feedback(guessed_row)
 
-    feedback =         {'name': guess_name,
-         'gender_feedback': gender_feedback,
-         'city_feedback': city_feedback,
-         'country_feedback': country_feedback,
-         'continent_feedback': continent_feedback,
-         'domain_feedback': domain_feedback,
-         'death_feedback': death_feedback_result,
+    feedback = {
+        'name': guess_name,
+        'gender_feedback': gender_feedback,
+        'city_name': city_name,
+        'direction_image': direction_image,
+        'country_feedback': country_feedback,
+        'continent_feedback': continent_feedback,
+        'domain_feedback': domain_feedback,
+        'death_feedback': death_feedback_result,
          }
 
     return feedback

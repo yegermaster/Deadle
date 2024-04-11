@@ -26,7 +26,7 @@ def index():
         initialize_game()
 
     feedback = ''
-    if request.method == 'POST': # when the player make a guess
+    if request.method == 'POST': # when the player makes a guess
         guess_name = request.form.get('guess')
         if session['guess_attempts'] < 5:
             feedback = process_guess(guess_name)
@@ -83,12 +83,31 @@ def death_feedback(guessed_row):
 
     if guessed_death == chosen_death:
         death_feedback = f"✅ Correct: {guessed_death}"
-    elif guessed_death < chosen_death:
-        death_feedback = f"⬆️ Earlier: {guessed_death}"
+        icon_image = None
+    elif chosen_death > guessed_death >= chosen_death - 100:
+        icon_image = death_img_feedback(icon='still_alive_green')
+        death_feedback = guessed_death
+    elif chosen_death > guessed_death >= chosen_death - 500:
+        icon_image = death_img_feedback(icon='still_alive_yellow')
+        death_feedback = guessed_death
+    elif chosen_death > guessed_death < chosen_death -500:
+        icon_image = death_img_feedback(icon='still_alive_red')
+        death_feedback = guessed_death
+    elif chosen_death < guessed_death <= chosen_death + 100:
+        icon_image = death_img_feedback(icon='already_dead_green')
+        death_feedback = guessed_death
+    elif chosen_death < guessed_death <= chosen_death + 500:
+        icon_image = death_img_feedback(icon='already_dead_yellow')
+        death_feedback = guessed_death
+    elif chosen_death < guessed_death >= chosen_death + 500:
+        icon_image = death_img_feedback(icon='already_dead_red')
+        death_feedback = guessed_death
     else:
-        death_feedback = f"⬇️ Later: {guessed_death}"
+        death_feedback = 'no death feedback'
+        icon_image = None
 
-    return death_feedback
+    return death_feedback, icon_image
+
 
 def direction_feedback(guessed_row):
     to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
@@ -99,12 +118,11 @@ def direction_feedback(guessed_row):
     direction_image = f"<img src='{icon_path}' alt='{direction}'>"
     return direction_image
 
-def death_img_feedback():
-    icon = 'wrong'
+def death_img_feedback(icon):
     icon_filename = icon + '.png'
     icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
-    return icon
+    return icon_image
 
 
 
@@ -118,8 +136,7 @@ def generate_feedback(guessed_row):
     continent_feedback = f"✅{guessed_row['continentName']}" if guessed_row['continentName'] == session['target_info']['continentName'] else f"❌{guessed_row['continentName']}"
     occupation_feedback = f"✅ {guessed_row['occupation']}" if guessed_row['occupation'] == session['target_info']['occupation'] else f"❌{ guessed_row['occupation']}"
 
-    death_feedback_result = death_feedback(guessed_row)
-    death_img = death_img_feedback()
+    death_feedback_result, death_img = death_feedback(guessed_row)
 
     feedback = {
         'name': guess_name,

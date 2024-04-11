@@ -82,7 +82,6 @@ body {
     background-color: #0056b3;
 }
 
-/* New styles for improved spacing and readability in the feedback display */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -94,7 +93,7 @@ th, td {
     border-bottom: 1px solid #ddd; /* Adds a light line between rows */
 }
 
-tr:hover {background-color: #8a8c15;} /* Optional: highlights row on hover */
+tr:hover {background-color: #1A1A2E;} /* highlights row on hover */
 
 /* Specific styles for spacing inside the feedback lines */
 .guess-history-entry {

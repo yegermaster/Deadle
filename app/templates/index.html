@@ -5,7 +5,6 @@
     <title>Deadle</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        /* Add your existing CSS here and consider the following enhancements */
         .guess-history-entry { margin-bottom: 20px; }
         .guess-history-detail { margin-left: 20px; }
     </style>
@@ -26,30 +25,46 @@
         {% if feedback %}
             <p>{{ feedback|safe }}</p>
         {% endif %}
-            {% for guess in guess_history %}
-                <div class="guess-history-entry">
-                    <p>{{ guess.name }}</p>
-                    <p class="guess-history-detail">Death: {{ guess.death_feedback|safe }}</p>
-                    <p class="guess-history-detail">Gender and Occupation: {{ guess.gender_feedback|safe }}, {{ guess.occupation_feedback|safe }}</p>
-                    <p class="guess-history-detail">Country and Continent: {{ guess.country_feedback|safe }}, {{ guess.continent_feedback|safe }}</p>
-                    <p class="guess-history-detail">
-                        City and Direction: {{ guess.direction_image|safe }}, {{ guess.city_name }}
-                    </p>
-                </div>
-            {% endfor %}
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Death</th>
+                    <th>Occupation</th>
+                    <th>Country</th>
+                    <th>Continent</th>
+                    <th>City</th>
+                    <th>Direction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guess in guess_history %}
+                    <tr>
+                        <td>{{ guess['name'] }}</td>
+                        <td>{{ guess['gender_feedback'] }} {{ guess['death_img']|safe }}</td>
+                        <td>{{ guess['death_feedback'] }}</td>
+                        <td>{{ guess['occupation_feedback'] }}</td>
+                        <td>{{ guess['country_feedback'] }}</td>
+                        <td>{{ guess['continent_feedback'] }}</td>
+                        <td>{{ guess['city_name'] }}</td>
+                        <td>{{ guess['direction_image']|safe }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         {% if session.get('reveal', False) %}
             <div class="reveal-info">
                 <h2>The historical figure was:</h2>
                 <p>Name: {{ session['target_info']['Name'] }}</p>
                 <p>Gender: {{ session['target_info']['gender'] }}</p>
-                <p>City: {{ session['target_info']['birthcity'].lower() }}</p>
-                <p>Country: {{ session['target_info']['countryName'].lower() }}</p>
-                <p>Continent: {{ session['target_info']['continentName'].lower() }}</p>
+                <p>City: {{ session['target_info']['birthcity'] }}</p>
+                <p>Country: {{ session['target_info']['countryName'] }}</p>
+                <p>Continent: {{ session['target_info']['continentName'] }}</p>
                 <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
-                <p>Occupation: {{ session['target_info']['occupation'].lower() }}</p>
+                <p>Occupation: {{ session['target_info']['occupation'] }}</p>
                 {% if session.get('image_filename') %}
-                    <img src="{{ url_for('static', filename='img/wiki_img/' + session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
+                    <img src="{{ url_for('static', filename='img/wiki_img/'+ session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
                 {% endif %}
             </div>
         {% endif %}

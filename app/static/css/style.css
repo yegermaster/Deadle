@@ -6,25 +6,24 @@ body {
     color: #E0E0E0;
     margin: 0;
     padding: 20px;
-    line-height: 1.6; /* Enhances line spacing for better readability */
+    line-height: 1.6;
 }
 
 .container {
     text-align: center;
     width: 100%;
     max-width: 700px;
-    margin: 20px auto; /* Increased margin for more space at the top and bottom */
-    padding: 20px; /* Added padding for more space inside the container */
-    background-color: #262A34; /* Slight contrast from body background */
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* Adds depth */
-    border-radius: 10px; /* Softens edges */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #262A34;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 10px;
 }
 
-/* Logo image styling for proper placement and scaling */
 .container img.logo {
-    max-width: 100%; /* Ensures logo scales down on smaller screens */
-    height: auto; /* Maintains aspect ratio */
-    margin-bottom: 20px; /* Adds space between the logo and the heading */
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
 }
 
 .guess-form input[type="text"] {
@@ -81,6 +80,29 @@ body {
 
 .reset-button:hover {
     background-color: #0056b3;
+}
+
+/* New styles for improved spacing and readability in the feedback display */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd; /* Adds a light line between rows */
+}
+
+tr:hover {background-color: #8a8c15;} /* Optional: highlights row on hover */
+
+/* Specific styles for spacing inside the feedback lines */
+.guess-history-entry {
+    margin-bottom: 20px;
+}
+
+.guess-history-detail {
+    margin-left: 20px;
 }
 
 @media (max-width: 600px) {

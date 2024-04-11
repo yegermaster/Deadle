@@ -136,7 +136,6 @@ def plot_occupation_count():
     occupation_count = df['occupation'].value_counts()
     occupation_count = occupation_count[occupation_count >= 20]
 
-
     plt.figure(figsize=(10, 6))
     occupation_count.plot(kind='bar')
     plt.title('Count of Entries per occupation')

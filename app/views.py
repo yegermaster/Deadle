@@ -7,7 +7,7 @@ from app import helper
 
 app.secret_key = '123'
 
-df = pd.read_excel('dead_db.xlsx', dtype={'deathyear': 'Int64'})
+df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
 my_list = df["Name"].tolist()
 
 @app.route('/reset')
@@ -53,8 +53,12 @@ def initialize_game():
     """Initializes the game with random choice"""
     session['guess_attempts'] = 0
     session['guess_history'] = []
-    r = random.randint(0, len(df) - 1) # choosing randomly number from the list
-    session['target_info'] = df.iloc[r].to_dict()
+    r = random.randint(0, len(df) - 1) # choosing random number from the list
+    dict_df = df.iloc[r].to_dict()
+    for k, v in dict_df.items():
+        if k=='birthcity' or k=='countryName' or k=='continentName' or k=='occupation' :
+            dict_df.update({k:v.lower()})
+    session['target_info'] = dict_df
 
 
 def process_guess(guess_name):
@@ -91,9 +95,16 @@ def direction_feedback(guessed_row):
     from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
     direction = helper.get_direction(from_coord, to_coord)
     icon_filename = direction + '.png'
-    icon_path = url_for('static', filename=f'img/arrows/{icon_filename}') # creating the path to the correct direction
+    icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
     direction_image = f"<img src='{icon_path}' alt='{direction}'>"
     return direction_image
+
+def death_img_feedback():
+    icon = 'wrong'
+    icon_filename = icon + '.png'
+    icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
+    icon_image = f"<img src='{icon_path}' alt='{icon}'>"
+    return icon
 
 
 
@@ -108,6 +119,7 @@ def generate_feedback(guessed_row):
     occupation_feedback = f"✅ {guessed_row['occupation']}" if guessed_row['occupation'] == session['target_info']['occupation'] else f"❌{ guessed_row['occupation']}"
 
     death_feedback_result = death_feedback(guessed_row)
+    death_img = death_img_feedback()
 
     feedback = {
         'name': guess_name,
@@ -118,6 +130,7 @@ def generate_feedback(guessed_row):
         'continent_feedback': continent_feedback.lower(),
         'occupation_feedback': occupation_feedback.lower(),
         'death_feedback': death_feedback_result,
+        'death_img' : death_img
          }
 
     return feedback

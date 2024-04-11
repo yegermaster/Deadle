@@ -58,7 +58,7 @@ def load_wiki_image(image_url, wiki_url, headers):
         image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
-        image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg') # saving the image with it's own name
+        image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg') # saving the image with its own name
 
         with open(image_name, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=128):
@@ -110,4 +110,4 @@ def get_cords(city):
         return None
 
 if __name__ == '__main__':
-    print(get_cords(('KHORASAN')))
+    print(get_cords('KHORASAN'))

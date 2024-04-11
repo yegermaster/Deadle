@@ -1,9 +1,8 @@
 from flask import render_template, request, redirect, url_for, session
 import pandas as pd
 import random
-from app import app
+from app import app, helper
 import os
-from app import helper
 
 app.secret_key = '123'
 
@@ -15,6 +14,7 @@ def reset():
     """Route to reset the game session and redirects to the index page"""
     session.clear()
     return redirect(url_for('index'))
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -28,19 +28,20 @@ def index():
     feedback = ''
     if request.method == 'POST': # when the player makes a guess
         guess_name = request.form.get('guess')
-        if session['guess_attempts'] < 5:
+        attempts = session.get('guess_attempts', 0)
+        target = session.get('target_info', {})
+        if attempts < 5:
             feedback = process_guess(guess_name)
-        if session['guess_attempts'] == 5:
+        if attempts == 5:
             session['reveal'] = True
             # deal with image
-            wiki_url = session['target_info']['Link']
+            wiki_url = target['Link']
             image_filename =  wiki_url.split('/')[-1] + '.jpg'
             image_path = os.path.join('app', 'static', 'img', image_filename)
             if not os.path.exists(image_path):
                 helper.download_image(wiki_url)
             session['image_filename'] = image_filename
-
-            feedback += " The historical figure was: " + session['target_info']['Name']
+            feedback += " The historical figure was: " + target['Name']
     # sends the information to the html file (frontend)
     return render_template('index.html',
                            feedback=feedback,
@@ -77,29 +78,30 @@ def process_guess(guess_name):
         return 'Max attempts. Reset to start again '
 
 def death_feedback(guessed_row):
-    """Generates feedback for death year"""
+    """Generates feedback for death year and the correct image"""
     guessed_death = int(guessed_row['deathyear'])
     chosen_death = int(session['target_info']['deathyear'])
 
-    if guessed_death == chosen_death:
+
+    if guessed_death == chosen_death: # correct
         death_feedback = f"✅ Correct: {guessed_death}"
         icon_image = None
-    elif chosen_death > guessed_death >= chosen_death - 100:
+    elif chosen_death > guessed_death >= chosen_death - 100: # guess is under by 100-
         icon_image = death_img_feedback(icon='still_alive_green')
         death_feedback = guessed_death
-    elif chosen_death > guessed_death >= chosen_death - 500:
+    elif chosen_death > guessed_death >= chosen_death - 500: # guess is under by 100-500
         icon_image = death_img_feedback(icon='still_alive_yellow')
         death_feedback = guessed_death
-    elif chosen_death > guessed_death < chosen_death -500:
+    elif chosen_death > guessed_death < chosen_death -500: # guess is under by 500+
         icon_image = death_img_feedback(icon='still_alive_red')
         death_feedback = guessed_death
-    elif chosen_death < guessed_death <= chosen_death + 100:
+    elif chosen_death < guessed_death <= chosen_death + 100: # guess is over by 100-
         icon_image = death_img_feedback(icon='already_dead_green')
         death_feedback = guessed_death
-    elif chosen_death < guessed_death <= chosen_death + 500:
+    elif chosen_death < guessed_death <= chosen_death + 500: # guess is over by 100-500
         icon_image = death_img_feedback(icon='already_dead_yellow')
         death_feedback = guessed_death
-    elif chosen_death < guessed_death >= chosen_death + 500:
+    elif chosen_death < guessed_death >= chosen_death + 500: # guess is over by 500+
         icon_image = death_img_feedback(icon='already_dead_red')
         death_feedback = guessed_death
     else:
@@ -123,7 +125,6 @@ def death_img_feedback(icon):
     icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
     return icon_image
-
 
 
 def generate_feedback(guessed_row):

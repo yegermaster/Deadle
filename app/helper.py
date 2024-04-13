@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import requests
 from flask import url_for
-
+from PIL import Image, ImageDraw, ImageFont
 
 
 def download_image(wiki_url):
@@ -111,11 +111,29 @@ def get_cords(city):
     else:
         return None
 
-def icon_img_feedback(icon):
+def icon_img_feedback(icon, dir):
     icon_filename = icon + '.png'
-    icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
+    icon_path = url_for('static', filename=f'img/icons/{dir}/{icon_filename}')
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
     return icon_image
 
+def create_text_image(text, color, dir):
+    img  = Image.new('RGB', (150, 75), color = '#262A34')
+    d = ImageDraw.Draw(img)
+
+    font_path = r'C:\Users\Owner\לימודים\deadle\app\static\css\youmurdererbb_reg.ttf'
+    font = ImageFont.truetype(font_path,size=40)
+
+    text_width, text_height = d.textsize(text, font=font)
+    text_x = (img.width - text_width) / 2
+    text_y = (img.height - text_height) / 2
+    d.text((text_x - 1, text_y - 1), text, font=font, fill=(0, 0, 0))
+    d.text((text_x-2, text_y), text, font=font, fill=(250,0,0))
+
+    thickness = 5
+    d.rectangle([0, 0, img.width, img.height], outline=color, width= thickness)
+
+    img.save(f'{dir}{text}_{color}.png')
+
 if __name__ == '__main__':
-    print(get_cords('KHORASAN'))
+    create_text_image('shoe maker', 'red', 'occupations')

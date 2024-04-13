@@ -44,9 +44,9 @@
                         <td>{{ guess['name'] }}</td>
                         <td>{{ guess['gender_feedback']|safe }} </td>
                         <td>{{ guess['death_feedback'] }} {{ guess['death_img']|safe }}</td>
-                        <td>{{ guess['occupation_feedback'] }}</td>
+                        <td>{{ guess['occupation_feedback']|safe }}</td>
                         <td>{{ guess['country_feedback'] }}</td>
-                        <td>{{ guess['continent_feedback'] }}</td>
+                        <td>{{ guess['continent_feedback']|safe }}</td>
                         <td>{{ guess['city_name'] }}</td>
                         <td>{{ guess['direction_image']|safe }}</td>
                     </tr>

@@ -77,7 +77,7 @@ def process_guess(guess_name):
     if session['guess_attempts'] >= 5:
         return 'Max attempts. Reset to start again '
 
-def death_feedback(guessed_row):
+def get_death_feedback(guessed_row):
     """Generates feedback for death year and the correct image"""
     guessed_death = int(guessed_row['deathyear'])
     chosen_death = int(session['target_info']['deathyear'])
@@ -87,22 +87,22 @@ def death_feedback(guessed_row):
         death_feedback = f"✅ Correct: {guessed_death}"
         icon_image = None
     elif chosen_death > guessed_death >= chosen_death - 100: # guess is under by 100-
-        icon_image = death_img_feedback(icon='still_alive_green')
+        icon_image = helper.icon_img_feedback(icon='still_alive_green')
         death_feedback = guessed_death
     elif chosen_death > guessed_death >= chosen_death - 500: # guess is under by 100-500
-        icon_image = death_img_feedback(icon='still_alive_yellow')
+        icon_image = helper.icon_img_feedback(icon='still_alive_yellow')
         death_feedback = guessed_death
     elif chosen_death > guessed_death < chosen_death -500: # guess is under by 500+
-        icon_image = death_img_feedback(icon='still_alive_red')
+        icon_image = helper.icon_img_feedback(icon='still_alive_red')
         death_feedback = guessed_death
     elif chosen_death < guessed_death <= chosen_death + 100: # guess is over by 100-
-        icon_image = death_img_feedback(icon='already_dead_green')
+        icon_image = helper.icon_img_feedback(icon='already_dead_green')
         death_feedback = guessed_death
     elif chosen_death < guessed_death <= chosen_death + 500: # guess is over by 100-500
-        icon_image = death_img_feedback(icon='already_dead_yellow')
+        icon_image = helper.icon_img_feedback(icon='already_dead_yellow')
         death_feedback = guessed_death
     elif chosen_death < guessed_death >= chosen_death + 500: # guess is over by 500+
-        icon_image = death_img_feedback(icon='already_dead_red')
+        icon_image = helper.icon_img_feedback(icon='already_dead_red')
         death_feedback = guessed_death
     else:
         death_feedback = 'no death feedback'
@@ -111,7 +111,7 @@ def death_feedback(guessed_row):
     return death_feedback, icon_image
 
 
-def direction_feedback(guessed_row):
+def get_direction_feedback(guessed_row):
     to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
     from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
     direction = helper.get_direction(from_coord, to_coord)
@@ -120,24 +120,37 @@ def direction_feedback(guessed_row):
     direction_image = f"<img src='{icon_path}' alt='{direction}'>"
     return direction_image
 
-def death_img_feedback(icon):
-    icon_filename = icon + '.png'
-    icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
-    icon_image = f"<img src='{icon_path}' alt='{icon}'>"
-    return icon_image
+
+def get_gender_feedback(guessed_row):
+    guessed_gender = guessed_row['gender']
+    chosen_gender = session['target_info']['gender']
+
+    if guessed_gender == chosen_gender:
+        if guessed_gender == 'Female':
+            icon = 'female_green'
+        else:
+            icon = 'male_green'
+    else:
+        if guessed_gender == 'Male':
+            icon = 'male_red'
+        else:
+            icon = 'female_red'
+    feedback = helper.icon_img_feedback(icon)
+    return feedback
 
 
 def generate_feedback(guessed_row):
     """Generate feedback from the database compared to the guess"""
     guess_name = guessed_row['Name']
     city_name = guessed_row['birthcity']
-    direction_image = direction_feedback(guessed_row)
-    gender_feedback = f"✅ {guessed_row['gender']}" if guessed_row['gender'] == session['target_info']['gender'] else f"❌ {guessed_row['gender']}"
+    direction_image = get_direction_feedback(guessed_row)
+    gender_feedback = get_gender_feedback(guessed_row)
+
     country_feedback = f"✅ {guessed_row['countryName']}" if guessed_row['countryName'] == session['target_info']['countryName'] else f"❌{guessed_row['countryName']}"
     continent_feedback = f"✅{guessed_row['continentName']}" if guessed_row['continentName'] == session['target_info']['continentName'] else f"❌{guessed_row['continentName']}"
     occupation_feedback = f"✅ {guessed_row['occupation']}" if guessed_row['occupation'] == session['target_info']['occupation'] else f"❌{ guessed_row['occupation']}"
 
-    death_feedback_result, death_img = death_feedback(guessed_row)
+    death_feedback, death_img = get_death_feedback(guessed_row)
 
     feedback = {
         'name': guess_name,
@@ -147,7 +160,7 @@ def generate_feedback(guessed_row):
         'country_feedback': country_feedback.lower(),
         'continent_feedback': continent_feedback.lower(),
         'occupation_feedback': occupation_feedback.lower(),
-        'death_feedback': death_feedback_result,
+        'death_feedback': death_feedback,
         'death_img' : death_img
          }
 

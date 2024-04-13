@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import requests
+from flask import url_for
+
 
 
 def download_image(wiki_url):
@@ -108,6 +110,12 @@ def get_cords(city):
         return lon, lat
     else:
         return None
+
+def icon_img_feedback(icon):
+    icon_filename = icon + '.png'
+    icon_path = url_for('static', filename=f'img/icons/{icon_filename}')
+    icon_image = f"<img src='{icon_path}' alt='{icon}'>"
+    return icon_image
 
 if __name__ == '__main__':
     print(get_cords('KHORASAN'))

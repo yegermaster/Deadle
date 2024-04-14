@@ -6,15 +6,13 @@ Deadle is a web game inspired by the popular word game Wordle, but with a twist 
 
 Deadle offers an educational and entertaining experience for history enthusiasts and casual gamers alike.
 
-![img.png](app/static/img/pr/first_guess.png)
-
 
 ## Features
 
 - **Interactive Guessing Game:** Players receive clues to guess the historical figure within limited attempts.
+- **The clues:** The clues are actually feedback for the information of his last guess that include:
+gender, occupation, death year globe view, and a direction that point the direction of the correct figure
 - **Educational Fun:** Learn about interesting historical figures as you play.
-
-![img_1.png](app/static/img/pr/game_over.png)
 
 ### Usage
 Start the game by entering a random guess for a dead historical figure.

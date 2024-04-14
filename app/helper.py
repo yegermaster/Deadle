@@ -4,6 +4,9 @@ import os
 import requests
 from flask import url_for
 from PIL import Image, ImageDraw, ImageFont
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import numpy as np
 
 
 def download_image(wiki_url):
@@ -111,13 +114,14 @@ def get_cords(city):
     else:
         return None
 
-def icon_img_feedback(icon, dir):
+def icon_img_feedback(icon, directory):
+    icon = str(icon)
     icon_filename = icon + '.png'
-    icon_path = url_for('static', filename=f'img/icons/{dir}/{icon_filename}')
+    icon_path = url_for('static', filename=f'img/icons/{directory}/{icon_filename}')
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
     return icon_image
 
-def create_text_image(text, color, dir):
+def create_text_image(text, color, directory):
     img  = Image.new('RGB', (150, 75), color = '#262A34')
     d = ImageDraw.Draw(img)
 
@@ -131,9 +135,33 @@ def create_text_image(text, color, dir):
     d.text((text_x-2, text_y), text, font=font, fill=(250,0,0))
 
     thickness = 5
-    d.rectangle([0, 0, img.width, img.height], outline=color, width= thickness)
+    d.rectangle((0, 0, img.width, img.height), outline=color, width= thickness)
 
-    img.save(f'{dir}{text}_{color}.png')
+    img.save(f'{directory}{text}_{color}.png')
+
+def handle_globe_img(filename):
+    img = Image.open(f'static/img/icons/globe/{filename}.png')
+    new_img = img.resize((100, 100))
+    new_img.save(f'app/static/img/icons/globe/{filename}.png')
+
+def plot_location_on_globe(latitude, longitude, filename, color):
+    if np.isnan(latitude) or np.isnan(longitude):
+        create_text_image('nan', color=color, directory='globe')
+    else:
+        fig = plt.figure(figsize=(5, 5), facecolor='#262A34')
+        ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(longitude, latitude))
+        ax.set_global()
+        ax.stock_img()
+        ax.plot(longitude, latitude, 'ro',markersize = 10,transform=ccrs.Geodetic())
+        ax.figure.patch.set_facecolor('#262A34')
+        save_path = f"static/img/icons/globe/{filename}.png"
+        directory = os.path.dirname(save_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        plt.savefig(save_path)
+        handle_globe_img(filename)
+
+#TODO: add a clear images function that deletes all jpeg and pngs in the directory so the app wont be too filey
 
 if __name__ == '__main__':
-    create_text_image('shoe maker', 'red', 'occupations')
+    plot_location_on_globe(10.2735633, -84.0739102, filename='costa rica', color='red')

@@ -4,3 +4,6 @@ beautifulsoup4==4.12.2
 requests==2.25.1
 matplotlib~=3.6.2
 seaborn~=0.13.2
+Cartopy~=0.23.0
+numpy~=1.23.5
+Pillow~=9.5.0

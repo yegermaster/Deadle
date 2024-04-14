@@ -6,12 +6,13 @@ import os
 
 app.secret_key = '123'
 
-df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'})
-my_list = df["Name"].tolist()
+df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
+my_list = df["Name"].tolist() # getting the Names for the player the cose from
 
 @app.route('/reset')
 def reset():
     """Route to reset the game session and redirects to the index page"""
+    #TODO: mabye delete all images
     session.clear()
     return redirect(url_for('index'))
 
@@ -30,17 +31,19 @@ def index():
         guess_name = request.form.get('guess')
         attempts = session.get('guess_attempts', 0)
         target = session.get('target_info', {})
-        if attempts < 5:
+        if attempts < 4: #TODO: hardcode this 4
             feedback = process_guess(guess_name)
-        if attempts == 5:
+        if attempts == 4:
             session['reveal'] = True
+            print("Reveal set to True")
             # deal with image
             wiki_url = target['Link']
             image_filename =  wiki_url.split('/')[-1] + '.jpg'
-            image_path = os.path.join('app', 'static', 'img', image_filename)
+            image_path = os.path.join('app', 'static', 'img','wiki_img', image_filename)
             if not os.path.exists(image_path):
                 helper.download_image(wiki_url)
             session['image_filename'] = image_filename
+            print("Image filename in session:", session['image_filename'])
             feedback += " The historical figure was: " + target['Name']
     # sends the information to the html file (frontend)
     return render_template('index.html',
@@ -77,69 +80,77 @@ def process_guess(guess_name):
     if session['guess_attempts'] >= 5:
         return 'Max attempts. Reset to start again '
 
+#TODO: get rid of double code (there is ALOT(!) of similar functions in this code
 def get_occupation_feedback(guessed_row):
+    """Gets the correct occupation img output"""
     guessed_occupation = guessed_row['occupation'].lower()
     chosen_occupation = session['target_info']['occupation'].lower()
-
     color = 'green' if guessed_occupation == chosen_occupation else 'red'
     icon = f'{guessed_occupation}_{color}'
     icon_path = os.path.join('app', 'static', 'img','icons', 'occupations', icon)
     if not os.path.exists(icon_path):
-        helper.create_text_image(guessed_occupation.lower(), color, dir='app/static/img/icons/occupations/' )
-
-    return helper.icon_img_feedback(icon, dir='occupations')
+        helper.create_text_image(guessed_occupation.lower(), color, directory='app/static/img/icons/occupations/')
+    return helper.icon_img_feedback(icon, directory='occupations')
 
 def get_continent_feedback(guessed_row):
+    """Gets the correct continent img output"""
     guessed_con = guessed_row['continentName'].lower()
     chosen_con = session['target_info']['continentName'].lower()
-
     color = 'green' if guessed_con == chosen_con else 'red'
     icon = f'{guessed_con}_{color}'
     icon_path = os.path.join('app', 'static', 'img','icons', 'occupations', icon)
     if not os.path.exists(icon_path):
-        helper.create_text_image(guessed_con.lower(), color, dir='app/static/img/icons/continents/' )
-    return helper.icon_img_feedback(icon, dir='continents')
+        helper.create_text_image(guessed_con.lower(), color, directory='app/static/img/icons/continents/')
+    return helper.icon_img_feedback(icon, directory='continents')
 
 def get_gender_feedback(guessed_row):
+    """Gets the correct gender img output"""
     guessed_gender = guessed_row['gender']
     chosen_gender = session['target_info']['gender']
     color = 'green' if guessed_gender == chosen_gender else 'red'
     icon = f'{guessed_gender.lower()}_{color}'
-    return helper.icon_img_feedback(icon, dir='genders')
-
+    return helper.icon_img_feedback(icon, directory='genders')
 
 def get_death_feedback(guessed_row):
+    """Gets the correct death year img output"""
     guessed_death = int(guessed_row['deathyear'])
     chosen_death = int(session['target_info']['deathyear'])
     diff = guessed_death - chosen_death
-
     if diff == 0:
         icon_image = None
         death_feedback = f"✅ Correct: {guessed_death}"
     elif abs(diff) <= 100:
         icon = 'green' if diff < 0 else 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', dir='deaths')
+        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
         death_feedback = guessed_death
     elif abs(diff) <= 500:
         icon = 'yellow' if diff < 0 else 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', dir='deaths')
+        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
         death_feedback = guessed_death
     else:
         icon = 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', dir='deaths')
+        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
         death_feedback = guessed_death
-
     return death_feedback, icon_image
 
 
 def get_direction_feedback(guessed_row):
-    to_coord= (float(guessed_row['longitude']), float(guessed_row['latitude']))
-    from_coord = (float(session['target_info']['longitude']), float( session['target_info']['latitude']))
+    """Gets the correct direction year img output"""
+    to_coord= (float(guessed_row['latitude']), float(guessed_row['longitude']))
+    from_coord = (float(session['target_info']['latitude']), float( session['target_info']['longitude']))
     direction = helper.get_direction(from_coord, to_coord)
     direction_image = helper.icon_img_feedback(direction, 'directions')
     return direction_image
 
-
+def get_country_img(guessed_row):
+    """Gets the correct country img output"""
+    guessed_country = guessed_row['countryName']
+    chosen_country = session['target_info']['countryName']
+    lat, lan = guessed_row['latitude'], guessed_row['longitude']
+    color = 'green' if guessed_country == chosen_country else 'red'
+    helper.plot_location_on_globe(lat, lan, guessed_country, color)
+    country_img = helper.icon_img_feedback(guessed_country, 'globe')
+    return country_img
 
 def generate_feedback(guessed_row):
     """Generate feedback from the database compared to the guess"""
@@ -150,9 +161,7 @@ def generate_feedback(guessed_row):
     continent_feedback =get_continent_feedback(guessed_row)
     occupation_feedback = get_occupation_feedback(guessed_row)
     death_feedback, death_img = get_death_feedback(guessed_row)
-
-    country_feedback = f"✅ {guessed_row['countryName']}" if guessed_row['countryName'] == session['target_info']['countryName'] else f"❌{guessed_row['countryName']}"
-
+    country_feedback = get_country_img(guessed_row)
 
     feedback = {
         'name': guess_name,
@@ -165,7 +174,6 @@ def generate_feedback(guessed_row):
         'death_feedback': death_feedback,
         'death_img' : death_img
          }
-
     return feedback
 
 

@@ -122,6 +122,12 @@ def icon_img_feedback(icon, directory):
     return icon_image
 
 def create_text_image(text, color, directory):
+    try:
+        if text is None:
+            text = "Unknown"
+    except TypeError as e:
+        print(f'Error {e}')
+
     img  = Image.new('RGB', (150, 75), color = '#262A34')
     d = ImageDraw.Draw(img)
 
@@ -136,11 +142,10 @@ def create_text_image(text, color, directory):
 
     thickness = 5
     d.rectangle((0, 0, img.width, img.height), outline=color, width= thickness)
-
-    img.save(f'{directory}{text}_{color}.png')
+    img.save(f'{directory}/{text}_{color}.png')
 
 def handle_globe_img(filename):
-    img = Image.open(f'static/img/icons/globe/{filename}.png')
+    img = Image.open(f'app/static/img/icons/globe/{filename}.png')
     new_img = img.resize((100, 100))
     new_img.save(f'app/static/img/icons/globe/{filename}.png')
 
@@ -154,7 +159,7 @@ def plot_location_on_globe(latitude, longitude, filename, color):
         ax.stock_img()
         ax.plot(longitude, latitude, 'ro',markersize = 10,transform=ccrs.Geodetic())
         ax.figure.patch.set_facecolor('#262A34')
-        save_path = f"static/img/icons/globe/{filename}.png"
+        save_path = f"app/static/img/icons/globe/{filename}.png"
         directory = os.path.dirname(save_path)
         if not os.path.exists(directory):
             os.makedirs(directory)

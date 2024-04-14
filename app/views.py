@@ -5,53 +5,55 @@ from app import app, helper
 import os
 
 app.secret_key = '123'
+MAX_ATTEMPTS = 4
 
-df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
-my_list = df["Name"].tolist() # getting the Names for the player the cose from
+def load_data():
 
+    df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
+    return df["Name"].tolist(), df
+
+my_list, df = load_data()
 @app.route('/reset')
 def reset():
     """Route to reset the game session and redirects to the index page"""
-    #TODO: mabye delete all images
+    #TODO: maybe delete all images
     session.clear()
     return redirect(url_for('index'))
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """
-    Main route.
-    Initializes the game and Sends feedback and renders the page.
-    """
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
 
-    feedback = ''
-    if request.method == 'POST': # when the player makes a guess
+    feedback = ''  # Ensure feedback is always initialized to an empty string
+    if request.method == 'POST':
         guess_name = request.form.get('guess')
-        attempts = session.get('guess_attempts', 0)
-        target = session.get('target_info', {})
-        if attempts < 4: #TODO: hardcode this 4
-            feedback = process_guess(guess_name)
-        if attempts == 4:
-            session['reveal'] = True
-            print("Reveal set to True")
-            # deal with image
-            wiki_url = target['Link']
-            image_filename =  wiki_url.split('/')[-1] + '.jpg'
-            image_path = os.path.join('app', 'static', 'img','wiki_img', image_filename)
-            if not os.path.exists(image_path):
-                helper.download_image(wiki_url)
-            session['image_filename'] = image_filename
-            print("Image filename in session:", session['image_filename'])
-            feedback += " The historical figure was: " + target['Name']
-    # sends the information to the html file (frontend)
+        if guess_name:
+            attempts = session.get('guess_attempts', 0)
+            target = session.get('target_info', {})
+            process_feedback = process_guess(guess_name)  # Capture the feedback from guessing
+            if process_feedback:
+                feedback = process_feedback  # Ensure we only assign non-None feedback
+
+            if attempts >= MAX_ATTEMPTS - 1:
+                session['reveal'] = True
+                print("Reveal set to True")
+                wiki_url = target.get('Link', '')
+                image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
+                image_path = os.path.join('app', 'static', 'img', 'wiki_img', image_filename)
+                if not os.path.exists(image_path) and wiki_url:
+                    helper.download_image(wiki_url)
+                session['image_filename'] = image_filename
+                print("Image filename in session:", session['image_filename'])
+                feedback += " The historical figure was: " + target.get('Name', 'Unknown')
+
     return render_template('index.html',
                            feedback=feedback,
                            my_list=my_list,
                            guess_history=session.get('guess_history', []),
-                           image_filename = session.get('image_filename', '')
-                           )
+                           image_filename=session.get('image_filename', ''))
+
 
 def initialize_game():
     """Initializes the game with random choice"""
@@ -79,37 +81,6 @@ def process_guess(guess_name):
 
     if session['guess_attempts'] >= 5:
         return 'Max attempts. Reset to start again '
-
-#TODO: get rid of double code (there is ALOT(!) of similar functions in this code
-def get_occupation_feedback(guessed_row):
-    """Gets the correct occupation img output"""
-    guessed_occupation = guessed_row['occupation'].lower()
-    chosen_occupation = session['target_info']['occupation'].lower()
-    color = 'green' if guessed_occupation == chosen_occupation else 'red'
-    icon = f'{guessed_occupation}_{color}'
-    icon_path = os.path.join('app', 'static', 'img','icons', 'occupations', icon)
-    if not os.path.exists(icon_path):
-        helper.create_text_image(guessed_occupation.lower(), color, directory='app/static/img/icons/occupations/')
-    return helper.icon_img_feedback(icon, directory='occupations')
-
-def get_continent_feedback(guessed_row):
-    """Gets the correct continent img output"""
-    guessed_con = guessed_row['continentName'].lower()
-    chosen_con = session['target_info']['continentName'].lower()
-    color = 'green' if guessed_con == chosen_con else 'red'
-    icon = f'{guessed_con}_{color}'
-    icon_path = os.path.join('app', 'static', 'img','icons', 'occupations', icon)
-    if not os.path.exists(icon_path):
-        helper.create_text_image(guessed_con.lower(), color, directory='app/static/img/icons/continents/')
-    return helper.icon_img_feedback(icon, directory='continents')
-
-def get_gender_feedback(guessed_row):
-    """Gets the correct gender img output"""
-    guessed_gender = guessed_row['gender']
-    chosen_gender = session['target_info']['gender']
-    color = 'green' if guessed_gender == chosen_gender else 'red'
-    icon = f'{guessed_gender.lower()}_{color}'
-    return helper.icon_img_feedback(icon, directory='genders')
 
 def get_death_feedback(guessed_row):
     """Gets the correct death year img output"""
@@ -153,28 +124,43 @@ def get_country_img(guessed_row):
     return country_img
 
 def generate_feedback(guessed_row):
-    """Generate feedback from the database compared to the guess"""
-    guess_name = guessed_row['Name']
-    city_name = guessed_row['birthcity']
-    direction_image = get_direction_feedback(guessed_row)
-    gender_feedback = get_gender_feedback(guessed_row)
-    continent_feedback =get_continent_feedback(guessed_row)
-    occupation_feedback = get_occupation_feedback(guessed_row)
-    death_feedback, death_img = get_death_feedback(guessed_row)
-    country_feedback = get_country_img(guessed_row)
+    feedback_funcs = {
+        'occupation_feedback': ('occupation', 'occupations', True),
+        'continent_feedback': ('continentName', 'continents', True),
+        'gender_feedback': ('gender', 'genders'),
+        'country_feedback': ('countryName', 'globe')
+    }
+    feedback = {}
+    for key, (attr, directory, *args) in feedback_funcs.items():
+        feedback[key] = get_feedback(guessed_row, attr, directory, *args) if key != 'country_feedback' else get_country_img(guessed_row)
 
-    feedback = {
-        'name': guess_name,
-        'gender_feedback': gender_feedback,
-        'city_name': city_name.lower(),
-        'direction_image': direction_image,
-        'country_feedback': country_feedback.lower(),
-        'continent_feedback': continent_feedback.lower(),
-        'occupation_feedback': occupation_feedback,
-        'death_feedback': death_feedback,
-        'death_img' : death_img
-         }
+    feedback.update({
+        'name': guessed_row['Name'],
+        'city_name': guessed_row['birthcity'].lower(),
+        'direction_image': get_direction_feedback(guessed_row),
+        'death_feedback': get_death_feedback(guessed_row)[0],
+        'death_img': get_death_feedback(guessed_row)[1]
+    })
     return feedback
+
+
+def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
+    # Check if the attribute value is a string before calling lower()
+    guessed_value = guessed_row[attribute]
+    if isinstance(guessed_value, str):
+        guessed_value = guessed_value.lower()
+
+    chosen_value = session['target_info'][attribute]
+    if isinstance(chosen_value, str):
+        chosen_value = chosen_value.lower()
+
+    color = 'green' if guessed_value == chosen_value else 'red'
+    icon = f'{guessed_value}_{color}' if isinstance(guessed_value, str) else f'{guessed_value}'
+    icon_path = os.path.join('app', 'static', 'img', 'icons', icon_dir, icon)
+
+    if create_text and not os.path.exists(icon_path):
+        helper.create_text_image(str(guessed_value), color, directory=f'app/static/img/icons/{icon_dir}/')
+    return helper.icon_img_feedback(icon, directory=icon_dir)
 
 
 if __name__ == "__main__":

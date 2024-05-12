@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
+from app import app
 
 
 def download_image(wiki_url):
@@ -131,7 +132,7 @@ def create_text_image(text, color, directory):
     img  = Image.new('RGB', (150, 75), color = '#262A34')
     d = ImageDraw.Draw(img)
 
-    font_path = r'C:\Users\Owner\לימודים\deadle\app\static\css\youmurdererbb_reg.ttf'
+    font_path = os.path.join(app.root_path, 'static', 'css', 'youmurdererbb_reg.ttf')
     font = ImageFont.truetype(font_path,size=40)
 
     text_width, text_height = d.textsize(text, font=font)

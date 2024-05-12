@@ -9,10 +9,11 @@ MAX_ATTEMPTS = 4
 
 def load_data():
 
-    df = pd.read_excel('data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
+    df = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
     return df["Name"].tolist(), df
 
 my_list, df = load_data()
+
 @app.route('/reset')
 def reset():
     """Route to reset the game session and redirects to the index page"""
@@ -41,7 +42,7 @@ def index():
                 print("Reveal set to True")
                 wiki_url = target.get('Link', '')
                 image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
-                image_path = os.path.join('app', 'static', 'img', 'wiki_img', image_filename)
+                image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
                 if not os.path.exists(image_path) and wiki_url:
                     helper.download_image(wiki_url)
                 session['image_filename'] = image_filename

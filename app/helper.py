@@ -7,6 +7,12 @@ from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
+import sys
+
+# Set up base directory for handling paths
+base_dir = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
+sys.path.append(base_dir)
+
 from app import app
 
 
@@ -122,7 +128,7 @@ def icon_img_feedback(icon, directory):
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
     return icon_image
 
-def create_text_image(text, color, directory):
+def create_text_image(text: str, color: str, directory: str) -> Image:
     try:
         if text is None:
             text = "Unknown"
@@ -135,7 +141,9 @@ def create_text_image(text, color, directory):
     font_path = os.path.join(app.root_path, 'static', 'css', 'youmurdererbb_reg.ttf')
     font = ImageFont.truetype(font_path,size=40)
 
-    text_width, text_height = d.textsize(text, font=font)
+
+    # Deprecation fix: Use textbbox
+    text_width, text_height = d.textbbox((0, 0), text, font=font)[2:]
     text_x = (img.width - text_width) / 2
     text_y = (img.height - text_height) / 2
     d.text((text_x - 1, text_y - 1), text, font=font, fill=(0, 0, 0))
@@ -143,7 +151,8 @@ def create_text_image(text, color, directory):
 
     thickness = 5
     d.rectangle((0, 0, img.width, img.height), outline=color, width= thickness)
-    img.save(f'{directory}/{text}_{color}.png')
+    image_file_path = os.path.join(directory, f"{text}_{color}.png")
+    img.save(image_file_path)
 
 def handle_globe_img(filename):
     img = Image.open(f'app/static/img/icons/globe/{filename}.png')
@@ -152,7 +161,7 @@ def handle_globe_img(filename):
 
 def plot_location_on_globe(latitude, longitude, filename, color):
     if np.isnan(latitude) or np.isnan(longitude):
-        create_text_image('nan', color=color, directory='globe')
+        create_text_image('nan', color=color, directory='app/static/img/icons/globe/')
     else:
         fig = plt.figure(figsize=(5, 5), facecolor='#262A34')
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(longitude, latitude))
@@ -171,3 +180,4 @@ def plot_location_on_globe(latitude, longitude, filename, color):
 
 if __name__ == '__main__':
     plot_location_on_globe(10.2735633, -84.0739102, filename='costa rica', color='red')
+    create_text_image('nan', 'red', directory='app/static/img/icons/globe/')

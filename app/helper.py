@@ -85,31 +85,6 @@ def load_wiki_image(image_url, wiki_url, headers):
     except requests.exceptions.RequestException as erre:
         print("Oops: Something Else ", erre)
 
-def get_direction(from_coord, to_coord):
-    lat1, lon1 = from_coord
-    lat2, lon2 = to_coord
-
-    lat_diff = lat2 - lat1
-    lon_diff = lon2 - lon1
-
-    if lat_diff > 0 and abs(lon_diff) < abs(lat_diff) / 2:
-        return 'N'
-    elif lat_diff < 0 and abs(lon_diff) < abs(abs(lat_diff) / 2):
-        return 'S'
-    elif lon_diff > 0 and abs(lat_diff) < abs(lon_diff) / 2:
-        return 'E'
-    elif lon_diff < 0 and abs(lat_diff) < abs(lon_diff) / 2:
-        return 'W'
-    elif lat_diff > 0 and lon_diff > 0:
-        return 'NE'
-    elif lat_diff < 0 < lon_diff:
-        return 'SE'
-    elif lat_diff < 0 and lon_diff < 0:
-        return 'SW'
-    elif lat_diff > 0 > lon_diff:
-        return 'NW'
-    return 'Unknown'
-
 def get_cords(city):
     url = f"https://nominatim.openstreetmap.org/search?format=json&q={city}&limit=1"
     response = requests.get(url)
@@ -154,8 +129,10 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
     image_file_path = os.path.join(directory, f"{text}_{color}.png")
     img.save(image_file_path)
 
-def handle_globe_img(filename):
+def handle_globe_img(filename, color):
     img = Image.open(f'app/static/img/icons/globe/{filename}.png')
+    d = ImageDraw.Draw(img)
+    d.rectangle((0,0, img.width, img.height), outline=color, width=5)
     new_img = img.resize((100, 100))
     new_img.save(f'app/static/img/icons/globe/{filename}.png')
 
@@ -174,7 +151,7 @@ def plot_location_on_globe(latitude, longitude, filename, color):
         if not os.path.exists(directory):
             os.makedirs(directory)
         plt.savefig(save_path)
-        handle_globe_img(filename)
+        handle_globe_img(filename, color)
 
 #TODO: add a clear images function that deletes all jpeg and pngs in the directory so the app wont be too filey
 

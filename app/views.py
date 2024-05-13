@@ -61,9 +61,10 @@ def initialize_game():
     session['guess_attempts'] = 0
     session['guess_history'] = []
     r = random.randint(0, len(df) - 1) # choosing random number from the list
+    r=460
     dict_df = df.iloc[r].to_dict()
     for k, v in dict_df.items():
-        if k=='birthcity' or k=='countryName' or k=='continentName' or k=='occupation' :
+        if k=='countryName' or k=='continentName' or k=='occupation' :
             dict_df.update({k:v.lower()})
     session['target_info'] = dict_df
 
@@ -106,20 +107,13 @@ def get_death_feedback(guessed_row):
     return death_feedback, icon_image
 
 
-def get_direction_feedback(guessed_row):
-    """Gets the correct direction year img output"""
-    to_coord= (float(guessed_row['latitude']), float(guessed_row['longitude']))
-    from_coord = (float(session['target_info']['latitude']), float( session['target_info']['longitude']))
-    direction = helper.get_direction(from_coord, to_coord)
-    direction_image = helper.icon_img_feedback(direction, 'directions')
-    return direction_image
-
 def get_country_img(guessed_row):
     """Gets the correct country img output"""
-    guessed_country = guessed_row['countryName']
+    guessed_country = guessed_row['countryName'].lower()
     chosen_country = session['target_info']['countryName']
+    print(guessed_country, chosen_country)
     lat, lan = guessed_row['latitude'], guessed_row['longitude']
-    color = 'green' if guessed_country == chosen_country else 'red'
+    color = 'red' if guessed_country != chosen_country else 'green'
     helper.plot_location_on_globe(lat, lan, guessed_country, color)
     country_img = helper.icon_img_feedback(guessed_country, 'globe')
     return country_img
@@ -137,8 +131,6 @@ def generate_feedback(guessed_row):
 
     feedback.update({
         'name': guessed_row['Name'],
-        'city_name': guessed_row['birthcity'].lower(),
-        'direction_image': get_direction_feedback(guessed_row),
         'death_feedback': get_death_feedback(guessed_row)[0],
         'death_img': get_death_feedback(guessed_row)[1]
     })

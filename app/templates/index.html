@@ -34,8 +34,6 @@
                     <th>Occupation</th>
                     <th>Country</th>
                     <th>Continent</th>
-                    <th>City</th>
-                    <th>Direction</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,8 +45,6 @@
                         <td>{{ guess['occupation_feedback']|safe }}</td>
                         <td>{{ guess['country_feedback']|safe }}</td>
                         <td>{{ guess['continent_feedback']|safe }}</td>
-                        <td>{{ guess['city_name'] }}</td>
-                        <td>{{ guess['direction_image']|safe }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -58,7 +54,6 @@
                 <h2>The historical figure was:</h2>
                 <p>Name: {{ session['target_info']['Name'] }}</p>
                 <p>Gender: {{ session['target_info']['gender'] }}</p>
-                <p>City: {{ session['target_info']['birthcity'] }}</p>
                 <p>Country: {{ session['target_info']['countryName'] }}</p>
                 <p>Continent: {{ session['target_info']['continentName'] }}</p>
                 <p>Death Year: {{ session['target_info']['deathyear'] }}</p>

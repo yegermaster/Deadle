@@ -1,13 +1,26 @@
-import random
+import os
 import pandas as pd
+import sys
+
+# Set up base directory for handling paths
+base_dir = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
+sys.path.append(base_dir)
+
 from app import helper
 
-df = pd.read_csv("Nodes.csv", delimiter=';', on_bad_lines='skip')
+# Paths to files
+nodes_csv_path = os.path.join(base_dir, 'data', 'Nodes.csv')
+dead_db_path = os.path.join(base_dir, 'data', 'dead_db.xlsx')
+
+# Load and process CSV file
+df = pd.read_csv(nodes_csv_path, delimiter=';', on_bad_lines='skip')
 df.drop_duplicates(subset=["Name"], inplace=True)
-temp_db = pd.DataFrame(columns=[
-    'Id', 'Name', 'Link', 'birthcity', 'countryName', 'longitude',
-    'latitude', 'continentName', 'birthyear', 'deathyear', 'agespan',
-    'gender', 'occupation', 'industry', 'domain'])
+
+# DataFrame setup
+temp_db = df[['Name', 'Link', 'birthcity', 'countryName', 'longitude',
+              'latitude', 'continentName', 'birthyear', 'deathyear', 'agespan',
+              'gender', 'occupation', 'industry', 'domain']].copy()
+
 
 def fill_lat_lon(df):
     for index, row in df.iterrows():
@@ -18,9 +31,8 @@ def fill_lat_lon(df):
                 df.at[index, 'latitude'] = lat
                 df.at[index, 'longitude'] = lon
             else:
-                print(f"no coords found for {row['birthcity']}")
+                print(f"no cords found for {row['birthcity']}")
 
-temp_db["Id"] = df["Id"]
 temp_db["Name"] = df["Name"]
 temp_db["Link"] = df["Link"]
 temp_db["birthcity"] = df["birthcity"]
@@ -43,9 +55,9 @@ if __name__ == "__main__":
     dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
     df = dead_db
 
+    dead_db.reset_index(drop=True, inplace=True)
 
-
-    dead_db.to_excel('dead_db.xlsx')
+    dead_db.to_excel('data/dead_db.xlsx', index=False)
 
     unique_countries = df['countryName'].nunique()
     unique_continents = df['continentName'].nunique()
@@ -65,12 +77,21 @@ if __name__ == "__main__":
     oldest_death_name = dead_db[dead_db['deathyear'] == oldest_death_year]['Name'].iloc[0]
     newest_death_name = dead_db[dead_db['deathyear'] == newest_death_year]['Name'].iloc[0]
 
+    # Count the number of missing values in the 'birthcity' column
+    missing_city_names = dead_db['birthcity'].isna().sum()
+
+    print(f"Number of entries with no birthcity: {missing_city_names}")
+
+    names_with_missing_city = dead_db[dead_db['birthcity'].isna()]['Name']
+
+    print("Names with missing birthcity:")
+    print(names_with_missing_city)
+    '''
     print(
         f'Countries: {unique_countries}\nContinents: {unique_continents}\nCities: {unique_cities}\n'
         f'Occupation: {unique_occupation}\nIndustry: {unique_industry}\n Domain: {unique_domain},'
-        f'Alive in 2018: {len(alive_db)}\nDead total: {len(dead_db)}\nOldest birth year: {oldest_birth_year}, Name: {oldest_birth_name}\n'
+        f'\nAlive in 2018: {len(alive_db)}\nDead total: {len(dead_db)}\nOldest birth year: {oldest_birth_year}, Name: {oldest_birth_name}\n'
         f'Newest birth year: {newest_birth_year}, Name: {newest_birth_name}\nOldest death year: {oldest_death_year}, Name: {oldest_death_name}\n'
         f'Newest death year: {newest_death_year}, Name: {newest_death_name}\n All occupations: {df["occupation"].unique()}\n'
-        f'All ndustries: {df["industry"].unique()}\nAll Domains: {df["domain"].unique()}')
-
-
+        f'All industries: {df["industry"].unique()}\nAll Domains: {df["domain"].unique()}')
+    '''

@@ -1,16 +1,23 @@
+"""
+Module for processing and analyzing data from a CSV file containing historical figures.
+Loads data, processes it, and exports results to an Excel file.
+"""
+
+
 import os
-import pandas as pd
 import sys
-
-# Set up base directory for handling paths
-base_dir = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
-sys.path.append(base_dir)
-
+import pandas as pd
 from app import helper
 
+
+# Set up base directory for handling paths
+BASE_DIR = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
+sys.path.append(BASE_DIR)
+
+
 # Paths to files
-nodes_csv_path = os.path.join(base_dir, 'data', 'Nodes.csv')
-dead_db_path = os.path.join(base_dir, 'data', 'dead_db.xlsx')
+nodes_csv_path = os.path.join(BASE_DIR, 'data', 'Nodes.csv')
+dead_db_path = os.path.join(BASE_DIR, 'data', 'dead_db.xlsx')
 
 # Load and process CSV file
 df = pd.read_csv(nodes_csv_path, delimiter=';', on_bad_lines='skip')
@@ -22,16 +29,18 @@ temp_db = df[['Name', 'Link', 'birthcity', 'countryName', 'longitude',
               'gender', 'occupation', 'industry', 'domain']].copy()
 
 
-def fill_lat_lon(df):
-    for index, row in df.iterrows():
+def fill_lat_lon(data_frame):
+    """Fill missing latitude and longitude using helper function."""
+    for index, row in data_frame.iterrows():
         if pd.isna(row['latitude']) or pd.isna(row['longitude']) or row['latitude'] == "" or row['longitude'] == "":
             cords = helper.get_cords(row['birthcity'])
             if cords is not None:
                 lat, lon = cords
-                df.at[index, 'latitude'] = lat
-                df.at[index, 'longitude'] = lon
+                data_frame.at[index, 'latitude'] = lat
+                data_frame.at[index, 'longitude'] = lon
             else:
                 print(f"no cords found for {row['birthcity']}")
+
 
 temp_db["Name"] = df["Name"]
 temp_db["Link"] = df["Link"]
@@ -53,29 +62,33 @@ temp_db["latitude"] = df["latitude"]
 if __name__ == "__main__":
     alive_db = temp_db.loc[temp_db['deathyear'] == 2018]
     dead_db = temp_db[~temp_db.index.isin(alive_db.index)]
-    df = dead_db
+    data_frame = dead_db
 
     dead_db.reset_index(drop=True, inplace=True)
 
     dead_db.to_excel('data/dead_db.xlsx', index=False)
 
-    unique_countries = df['countryName'].nunique()
-    unique_continents = df['continentName'].nunique()
-    unique_cities = df['birthcity'].nunique()
+    unique_countries = data_frame['countryName'].nunique()
+    unique_continents = data_frame['continentName'].nunique()
+    unique_cities = data_frame['birthcity'].nunique()
 
-    unique_occupation = df['occupation'].nunique()
-    unique_industry = df['industry'].nunique()
-    unique_domain = df['domain'].nunique()
+    unique_occupation = data_frame['occupation'].nunique()
+    unique_industry = data_frame['industry'].nunique()
+    unique_domain = data_frame['domain'].nunique()
 
     oldest_birth_year = dead_db['birthyear'].min()
     newest_birth_year = dead_db['birthyear'].max()
     oldest_death_year = dead_db['deathyear'].min()
     newest_death_year = dead_db['deathyear'].max()
 
-    oldest_birth_name = dead_db[dead_db['birthyear'] == oldest_birth_year]['Name'].iloc[0]
-    newest_birth_name = dead_db[dead_db['birthyear'] == newest_birth_year]['Name'].iloc[0]
-    oldest_death_name = dead_db[dead_db['deathyear'] == oldest_death_year]['Name'].iloc[0]
-    newest_death_name = dead_db[dead_db['deathyear'] == newest_death_year]['Name'].iloc[0]
+    oldest_birth_name = dead_db[dead_db['birthyear']
+                                == oldest_birth_year]['Name'].iloc[0]
+    newest_birth_name = dead_db[dead_db['birthyear']
+                                == newest_birth_year]['Name'].iloc[0]
+    oldest_death_name = dead_db[dead_db['deathyear']
+                                == oldest_death_year]['Name'].iloc[0]
+    newest_death_name = dead_db[dead_db['deathyear']
+                                == newest_death_year]['Name'].iloc[0]
 
     # Count the number of missing values in the 'birthcity' column
     missing_city_names = dead_db['birthcity'].isna().sum()
@@ -86,12 +99,11 @@ if __name__ == "__main__":
 
     print("Names with missing birthcity:")
     print(names_with_missing_city)
-    '''
     print(
         f'Countries: {unique_countries}\nContinents: {unique_continents}\nCities: {unique_cities}\n'
         f'Occupation: {unique_occupation}\nIndustry: {unique_industry}\n Domain: {unique_domain},'
-        f'\nAlive in 2018: {len(alive_db)}\nDead total: {len(dead_db)}\nOldest birth year: {oldest_birth_year}, Name: {oldest_birth_name}\n'
-        f'Newest birth year: {newest_birth_year}, Name: {newest_birth_name}\nOldest death year: {oldest_death_year}, Name: {oldest_death_name}\n'
-        f'Newest death year: {newest_death_year}, Name: {newest_death_name}\n All occupations: {df["occupation"].unique()}\n'
-        f'All industries: {df["industry"].unique()}\nAll Domains: {df["domain"].unique()}')
-    '''
+        f'\nAlive in 2018: {len(alive_db)}\nDead total: {len(dead_db)}\nOldest birth year: {oldest_birth_year}, '
+        f'Name: {oldest_birth_name}\nNewest birth year: {newest_birth_year}, Name: {newest_birth_name}\n'
+        f'Oldest death year: {oldest_death_year}, Name: {oldest_death_name}\nNewest death year: {newest_death_year}, '
+        f'Name: {newest_death_name}\nAll occupations: {data_frame["occupation"].unique()}\n'
+        f'All industries: {data_frame["industry"].unique()}\nAll Domains: {data_frame["domain"].unique()}')

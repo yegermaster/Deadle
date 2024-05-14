@@ -1,29 +1,35 @@
-from flask import render_template, request, redirect, url_for, session
-import pandas as pd
-import random
-from app import app, helper
+"""
+This module handles the routes and core functionality for the Deadle web game.
+It includes game initialization, user input processing, and feedback generation.
+"""
+
 import os
+import random
+import pandas as pd
+from flask import render_template, request, redirect, url_for, session
+from app import app, helper
 
 app.secret_key = '123'
 MAX_ATTEMPTS = 4
 
 def load_data():
-
-    data_frame = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
-    return data_frame["Name"].tolist(), data_frame
+    """Load data from Excel file and return list of names and DataFrame."""
+    df = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
+    return df["Name"].tolist(), df
 
 my_list, data_frame = load_data()
 
 @app.route('/reset')
 def reset():
     """Route to reset the game session and redirects to the index page"""
-    #TODO: maybe delete all images
+    clear_imgs()
     session.clear()
     return redirect(url_for('index'))
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """Route for the main game page handling GET and POST requests."""
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
 
@@ -61,13 +67,11 @@ def initialize_game():
     session['guess_attempts'] = 0
     session['guess_history'] = []
     r = random.randint(0, len(data_frame) - 1) # choosing random number from the list
-    r=460
     dict_data_frame = data_frame.iloc[r].to_dict()
     for k, v in dict_data_frame.items():
         if k=='countryName' or k=='continentName' or k=='occupation' :
             dict_data_frame.update({k:v.lower()})
     session['target_info'] = dict_data_frame
-
 
 def process_guess(guess_name):
     """Processes a single guess and handling the attempts"""
@@ -119,6 +123,7 @@ def get_country_img(guessed_row):
     return country_img
 
 def generate_feedback(guessed_row):
+    """Generates feedback for the user's guess."""
     feedback_funcs = {
         'occupation_feedback': ('occupation', 'occupations', True),
         'continent_feedback': ('continentName', 'continents', True),
@@ -138,6 +143,7 @@ def generate_feedback(guessed_row):
 
 
 def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
+    """Gets the feedback for a specific attribute."""
     # Check if the attribute value is a string before calling lower()
     guessed_value = guessed_row[attribute]
     if isinstance(guessed_value, str):
@@ -155,6 +161,12 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
         helper.create_text_image(str(guessed_value), color, directory=f'app/static/img/icons/{icon_dir}/')
     return helper.icon_img_feedback(icon, directory=icon_dir)
 
+def clear_imgs():
+    """Clears images from directories."""
+    helper.clear_dir("wiki_img")
+    helper.clear_dir("icons/globe")
+    helper.clear_dir("icons/occupations")
+    helper.clear_dir("icons/continents")
 
 if __name__ == "__main__":
     app.run(debug=True)

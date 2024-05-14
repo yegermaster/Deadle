@@ -1,11 +1,16 @@
+"""
+This module contains functions for generating various plots to visualize data from the Deadle database.
+The plots include cross-sections of occupations, industries, domains, and counts per continent, country, city, etc.
+"""
+
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import os
 
 
-df = pd.read_excel('dead_db.xlsx')
+df = pd.read_excel('data/dead_db.xlsx')
 
 
 def plot_cross_section(occupation_industry=False, occupation_domain=False, industry_domain = False ):
@@ -21,11 +26,11 @@ def plot_cross_section(occupation_industry=False, occupation_domain=False, indus
         plt.xlabel('Industry')
         plt.show()
     elif occupation_domain:
-            sns.heatmap(occupation_domain_cross, annot=True, cmap="YlGnBu", fmt="d")
-            plt.title('Occupation vs Domain Distribution')
-            plt.ylabel('Occupation')
-            plt.xlabel('Industry')
-            plt.show()
+        sns.heatmap(occupation_domain_cross, annot=True, cmap="YlGnBu", fmt="d")
+        plt.title('Occupation vs Domain Distribution')
+        plt.ylabel('Occupation')
+        plt.xlabel('Industry')
+        plt.show()
     elif industry_domain:
         plt.figure(figsize=(20, 15))
         sns.heatmap(industry_domain_cross, annot=True, cmap="YlGnBu", fmt="d")

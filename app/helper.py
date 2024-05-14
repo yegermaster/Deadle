@@ -1,17 +1,20 @@
-import requests
-from bs4 import BeautifulSoup
+"""
+This module contains functions for handling image downloads, processing geographical data,
+and generating images for the Deadle web game.
+"""
 import os
-import requests
-from flask import url_for
-from PIL import Image, ImageDraw, ImageFont
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import numpy as np
 import sys
+import requests
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw, ImageFont
+from bs4 import BeautifulSoup
+from flask import url_for
+import cartopy.crs as ccrs
 
 # Set up base directory for handling paths
-base_dir = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
-sys.path.append(base_dir)
+BASE_DIR = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
+sys.path.append(BASE_DIR)
 
 from app import app
 
@@ -24,7 +27,7 @@ def download_image(wiki_url):
         'Referer': wiki_url
     }
     try:
-        response = requests.get(wiki_url, headers=headers)
+        response = requests.get(wiki_url, headers=headers, timeout=10)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
         print("Http Error", errh)
@@ -58,12 +61,13 @@ def download_image(wiki_url):
             image_url = domain + image_url
 
         load_wiki_image(image_url, wiki_url, headers) # downloading the image
-    except Exception as e:
+    except (AttributeError, TypeError) as e:
         print(f"An error occurred while processing the image: {e}")
 
 def load_wiki_image(image_url, wiki_url, headers):
+    """Load image from Wikipedia URL and save it locally."""
     try:
-        image_response = requests.get(image_url, headers=headers, stream=True)
+        image_response = requests.get(image_url, headers=headers, stream=True, timeout=10)
         image_response.raise_for_status()
 
         base_dir = os.path.abspath('')
@@ -86,8 +90,9 @@ def load_wiki_image(image_url, wiki_url, headers):
         print("Oops: Something Else ", erre)
 
 def get_cords(city):
+    """Gets a given city lattitude and longtitude"""
     url = f"https://nominatim.openstreetmap.org/search?format=json&q={city}&limit=1"
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     data = response.json()
     if data:
         lat = data[0]['lat']
@@ -96,7 +101,8 @@ def get_cords(city):
     else:
         return None
 
-def icon_img_feedback(icon, directory):
+def icon_img_feedback(icon:str, directory) -> str:
+    """Return a html ready code for a given icon."""
     icon = str(icon)
     icon_filename = icon + '.png'
     icon_path = url_for('static', filename=f'img/icons/{directory}/{icon_filename}')
@@ -104,6 +110,7 @@ def icon_img_feedback(icon, directory):
     return icon_image
 
 def create_text_image(text: str, color: str, directory: str) -> Image:
+    """Create an image with text and save it."""
     try:
         if text is None:
             text = "Unknown"
@@ -130,6 +137,7 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
     img.save(image_file_path)
 
 def handle_globe_img(filename, color):
+    """Handle the globe image by adding a border and resizing it."""
     img = Image.open(f'app/static/img/icons/globe/{filename}.png')
     d = ImageDraw.Draw(img)
     d.rectangle((0,0, img.width, img.height), outline=color, width=5)
@@ -137,6 +145,7 @@ def handle_globe_img(filename, color):
     new_img.save(f'app/static/img/icons/globe/{filename}.png')
 
 def plot_location_on_globe(latitude, longitude, filename, color):
+    """Plot the location on a globe and save the image."""
     if np.isnan(latitude) or np.isnan(longitude):
         create_text_image('nan', color=color, directory='app/static/img/icons/globe/')
     else:
@@ -153,8 +162,28 @@ def plot_location_on_globe(latitude, longitude, filename, color):
         plt.savefig(save_path)
         handle_globe_img(filename, color)
 
-#TODO: add a clear images function that deletes all jpeg and pngs in the directory so the app wont be too filey
+def clear_dir(dir_name):
+    """Delete all files inside the given directory within the static/img directory, without removing subdirectories."""
+    base_dir = os.path.join('app', 'static', 'img')
+    dir_path = os.path.join(base_dir, dir_name)
+
+    print(f"Checking directory: {dir_path}")  # Debugging line to check the path
+
+    if not os.path.exists(dir_path):
+        print(f"The directory {dir_path} does not exist.")
+        return
+
+    for filename in os.listdir(dir_path):
+        file_path = os.path.join(dir_path, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+                print(f"Deleted file: {file_path}")
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
 
 if __name__ == '__main__':
-    plot_location_on_globe(10.2735633, -84.0739102, filename='costa rica', color='red')
-    create_text_image('nan', 'red', directory='app/static/img/icons/globe/')
+    clear_dir("wiki_img")
+    clear_dir("icons/globe")
+    clear_dir("icons/occupations")
+    clear_dir("icons/continents")

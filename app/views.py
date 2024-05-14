@@ -9,10 +9,10 @@ MAX_ATTEMPTS = 4
 
 def load_data():
 
-    df = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
-    return df["Name"].tolist(), df
+    data_frame = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
+    return data_frame["Name"].tolist(), data_frame
 
-my_list, df = load_data()
+my_list, data_frame = load_data()
 
 @app.route('/reset')
 def reset():
@@ -60,18 +60,18 @@ def initialize_game():
     """Initializes the game with random choice"""
     session['guess_attempts'] = 0
     session['guess_history'] = []
-    r = random.randint(0, len(df) - 1) # choosing random number from the list
+    r = random.randint(0, len(data_frame) - 1) # choosing random number from the list
     r=460
-    dict_df = df.iloc[r].to_dict()
-    for k, v in dict_df.items():
+    dict_data_frame = data_frame.iloc[r].to_dict()
+    for k, v in dict_data_frame.items():
         if k=='countryName' or k=='continentName' or k=='occupation' :
-            dict_df.update({k:v.lower()})
-    session['target_info'] = dict_df
+            dict_data_frame.update({k:v.lower()})
+    session['target_info'] = dict_data_frame
 
 
 def process_guess(guess_name):
     """Processes a single guess and handling the attempts"""
-    guessed_row = df[df['Name'].str.upper() == guess_name.upper()]
+    guessed_row = data_frame[data_frame['Name'].str.upper() == guess_name.upper()]
     if guessed_row.empty:
         return 'Name not in list. Try again'
 

@@ -1,0 +1,11 @@
+{
+    "git.autofetch": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "workbench.settings.applyToAllProfiles": [
+        "autopep8.path"
+    ],
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": [
+        "--max-line-length=100"
+    ]
+}

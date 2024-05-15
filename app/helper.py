@@ -121,11 +121,15 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
     d = ImageDraw.Draw(img)
 
     font_path = os.path.join(app.root_path, 'static', 'css', 'youmurdererbb_reg.ttf')
-    font = ImageFont.truetype(font_path,size=40)
+    font_size = 40
 
-
-    # Deprecation fix: Use textbbox
-    text_width, text_height = d.textbbox((0, 0), text, font=font)[2:]
+    while True:
+        font = ImageFont.truetype(font_path, size=font_size)
+        text_width, text_height = d.textbbox((0, 0), text, font=font)[2:]
+        if text_width <= img.width - 15 and text_height <= img.height - 15:
+            break
+        font_size -=1
+    
     text_x = (img.width - text_width) / 2
     text_y = (img.height - text_height) / 2
     d.text((text_x - 1, text_y - 1), text, font=font, fill=(0, 0, 0))

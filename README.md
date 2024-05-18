@@ -14,10 +14,12 @@ Deadle offers an educational and entertaining experience for history enthusiasts
 gender, occupation, death year globe view, and a direction that point the direction of the correct figure
 - **Educational Fun:** Learn about interesting historical figures as you play.
 
-### Usage
-Start the game by entering a random guess for a dead historical figure.
-Use the feedback from each guess to make your next guess more accurate.
-You have five attempts to guess the correct figure. Can you guess it right?
+## **How to Play**
+1. Guess the historical figure based on the provided clues.
+2. Use the clues about gender, occupation, death year, and globe view to narrow down your options.
+3. Submit your guess and see if you’re correct!
+4. Try to do so with as little tries as possible.
+5. If you could do it you won! else, there will be a new historical figure to guess tommorw!
 
 ### Contributing
 Contributions to Deadle are welcome! Feel free to fork the repository and submit pull requests.
@@ -49,4 +51,14 @@ The datasets include figures that were born as early as 3500 BCE and those who d
 This rich timeline offers players a chance
 to guess among more than 6500 historical figures who have left their mark on the world.
 Each guess is an opportunity to learn and connect with the legacies of these remarkable individuals.
+
+## Technologies Used
+
+- **Python**: The main programming language used.
+- **Flask**: For building the web application.
+- **Pandas**: For the database of historical figures.
+- **HTML/CSS**: For the frontend design.
+- **PIL** For creating pictures for 
+- **matplotlib** and **seaborn** for visualization
+- **BeautifulSoup** For scraping information from wikipedia
 

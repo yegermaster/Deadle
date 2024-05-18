@@ -19,6 +19,18 @@ def load_data():
 
 my_list, data_frame = load_data()
 
+def choose_new_word():
+    """Choose a new target word randomly from the list."""
+    session['guess_attempts'] = 0
+    session['guess_history'] = []
+    r = random.randint(0, len(data_frame) - 1)
+    dict_data_frame = data_frame.iloc[r].to_dict()
+    for k, v in dict_data_frame.items():
+        if k == 'countryName' or k == 'continentName' or k == 'occupation':
+            dict_data_frame.update({k: v.lower()})
+    session['target_info'] = dict_data_frame
+
+
 @app.route('/reset')
 def reset():
     """Route to reset the game session and redirects to the index page"""

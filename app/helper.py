@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 from flask import url_for
+from datetime import datetime, timedelta
 import cartopy.crs as ccrs
 
 # Set up base directory for handling paths
@@ -18,6 +19,16 @@ sys.path.append(BASE_DIR)
 
 from app import app
 
+def resize_img(path: str, size: tuple) -> None:
+    """Resizes and image and save it."""    
+    img = Image.open(path)
+    new_img = img.resize(size)
+    new_img.save(path)
+
+def is_today(date_str):
+    if not date_str:
+        return False
+    return datetime.strptime(date_str, '%Y-%m-%d').date() == datetime.utcnow().date()
 
 def download_image(wiki_url):
     """Downloads the main image from wikipedia url"""

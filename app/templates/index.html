@@ -64,7 +64,7 @@
             </div>
         {% endif %}
 
-        {% if guess_history|length >= 4 %}
+        {% if guess_history|length >= MAX_ATTEMPTS %}
             <button onclick="window.location.href='/reset';">Reset Game</button>
         {% endif %}
     </div>

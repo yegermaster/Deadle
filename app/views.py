@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, session
 from app import app, helper
 
 app.secret_key = '123'
-MAX_ATTEMPTS = 4
+MAX_ATTEMPTS = 5
 
 def load_data():
     """Load data from Excel file and return list of names and DataFrame."""
@@ -18,17 +18,6 @@ def load_data():
     return df["Name"].tolist(), df
 
 my_list, data_frame = load_data()
-
-def choose_new_word():
-    """Choose a new target word randomly from the list."""
-    session['guess_attempts'] = 0
-    session['guess_history'] = []
-    r = random.randint(0, len(data_frame) - 1)
-    dict_data_frame = data_frame.iloc[r].to_dict()
-    for k, v in dict_data_frame.items():
-        if k == 'countryName' or k == 'continentName' or k == 'occupation':
-            dict_data_frame.update({k: v.lower()})
-    session['target_info'] = dict_data_frame
 
 
 @app.route('/reset')
@@ -54,7 +43,6 @@ def index():
             process_feedback = process_guess(guess_name)  # Capture the feedback from guessing
             if process_feedback:
                 feedback = process_feedback  # Ensure we only assign non-None feedback
-
             if attempts >= MAX_ATTEMPTS - 1:
                 session['reveal'] = True
                 print("Reveal set to True")
@@ -67,11 +55,13 @@ def index():
                 print("Image filename in session:", session['image_filename'])
                 feedback += " The historical figure was: " + target.get('Name', 'Unknown')
 
+
     return render_template('index.html',
                            feedback=feedback,
                            my_list=my_list,
                            guess_history=session.get('guess_history', []),
-                           image_filename=session.get('image_filename', ''))
+                           image_filename=session.get('image_filename', ''),
+                           MAX_ATTEMPTS=MAX_ATTEMPTS)
 
 
 def initialize_game():
@@ -97,7 +87,7 @@ def process_guess(guess_name):
     session['guess_history'].append(feedback)
     session.modified = True
 
-    if session['guess_attempts'] >= 5:
+    if session['guess_attempts'] >= MAX_ATTEMPTS:
         return 'Max attempts. Reset to start again '
 
 def get_death_feedback(guessed_row):

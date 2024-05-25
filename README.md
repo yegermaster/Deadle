@@ -1,6 +1,6 @@
 ![logo.jpg](app/static/img/logo.jpg)
 
-# Deadle —A Historical Figure Guessing Game
+# Deadle — A Historical Figure Guessing Game
 
 Deadle is a web game inspired by the popular word game Wordle, but with a twist - players are trying to guess historical (dead) figures. 
 

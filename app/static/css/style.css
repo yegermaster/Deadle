@@ -132,6 +132,20 @@ tr:hover {
     }
 }
 
+/* Button group styling */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Adjust the spacing between buttons as needed */
+}
+
+.info-button img {
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+}
+
+
 /* Modal styles */
 .modal {
     visibility: hidden; 
@@ -191,8 +205,22 @@ tr:hover {
     to {opacity: 1;}
 }
 
-/* About button styling */
+/* buttons styling */
 #aboutBtn {
+    background: none;
+    border: none; 
+    padding: 0; 
+    cursor: pointer;
+}
+
+#helpBtn {
+    background: none;
+    border: none; 
+    padding: 0; 
+    cursor: pointer;
+}
+
+#statsBtn {
     background: none;
     border: none; 
     padding: 0; 

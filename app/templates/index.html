@@ -11,8 +11,17 @@
 </head>
 <body>
     <div class="container">
+        <!-- Logo and title-->
     <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="logo">
         <h1>Guess the Historical Figure</h1>
+
+        <!-- About button to open modal-->
+        <button id="aboutBtn" style="background: none; border: none; padding: 0;">
+            <img src="{{ url_for('static', filename='img/about.png') }}" alt="About" style="width: 100px; height: auto;">
+        </button>
+        
+
+        <!-- Guess form-->
         <form method="post" class="guess-form">
             <input type="text" name="guess" list="name-options" autocomplete="off" required>
             <datalist id="name-options">
@@ -22,9 +31,13 @@
             </datalist>
             <button type="submit">Guess</button>
         </form>
+
+        <!-- Feedback message-->
         {% if feedback %}
             <p>{{ feedback|safe }}</p>
         {% endif %}
+
+        <!-- Guess feedback tale-->
         <table>
             <thead>
                 <tr>
@@ -49,6 +62,8 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Reveal information-->
         {% if session.get('reveal', False) %}
             <div class="reveal-info">
                 <h2>The historical figure was:</h2>
@@ -64,9 +79,53 @@
             </div>
         {% endif %}
 
+        <!-- Reset game button-->
         {% if guess_history|length >= MAX_ATTEMPTS %}
             <button onclick="window.location.href='/reset';">Reset Game</button>
         {% endif %}
+
+
+        <!-- Modal structure-->
+        <div id="aboutModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h1>About This Game</h1>
+                <p> Welcome to Deadle!
+                    Deadle is a web game inspired by Wordle, where players guess historical figures based on given clues.
+                    With each attempt, players receive feedback, helping them narrow down their options.
+                    Ideal for history enthusiasts, Deadle offers an educational and entertaining experience by connecting players with notable personalities from various eras and regions.
+                    </p>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("aboutModal");
+    
+        // Get the button that opens the modal
+        var btn = document.getElementById("aboutBtn");
+    
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+    
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.visibility = "visible";
+        }
+    
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.visibility = "hidden";
+        }
+    
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.visibility = "hidden";
+            }
+        }
+    </script>
+    
 </body>
 </html>

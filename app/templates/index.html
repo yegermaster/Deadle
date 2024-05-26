@@ -132,55 +132,7 @@
         </div>
     </div>
 
-    <script>
-        // Get the modals
-        var about_modal = document.getElementById("aboutModal");
-        var help_modal = document.getElementById("helpModal");
-        var stats_modal = document.getElementById("statsModal");
-    
-        // Get the buttons that open the modals
-        var about_btn = document.getElementById("aboutBtn");
-        var help_btn = document.getElementById("helpBtn");
-        var stats_btn = document.getElementById("statsBtn");
-    
-        // Get the <span> elements that close the modals
-        var about_span = about_modal.getElementsByClassName("close")[0];
-        var help_span = help_modal.getElementsByClassName("close")[0];
-        var stats_span = stats_modal.getElementsByClassName("close")[0];
-    
-        // When the user clicks the button, open the modal 
-        about_btn.onclick = function() {
-            about_modal.style.visibility = "visible";
-        }
-        help_btn.onclick = function() {
-            help_modal.style.visibility = "visible";
-        }
-        stats_btn.onclick = function() {
-            stats_modal.style.visibility = "visible";
-        }
-    
-        // When the user clicks on <span> (x), close the modal
-        about_span.onclick = function() {
-            about_modal.style.visibility = "hidden";
-        }
-        help_span.onclick = function() {
-            help_modal.style.visibility = "hidden";
-        }
-        stats_span.onclick = function() {
-            stats_modal.style.visibility = "hidden";
-        }
-    
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == about_modal) {
-                about_modal.style.visibility = "hidden";
-            } else if (event.target == help_modal) {
-                help_modal.style.visibility = "hidden";
-            } else if (event.target == stats_modal) {
-                stats_modal.style.visibility = "hidden";
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     
     
 </body>

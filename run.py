@@ -9,9 +9,10 @@ Usage:
 
 This will start the Flask development server for the Deadle game application.
 """
-from app import app
+from application.appGenerator import get_app
 
 def main():
+    app = get_app()
     app.run(debug=True)
 
 if __name__ == "__main__":

@@ -7,7 +7,10 @@ import os
 import random
 import pandas as pd
 from flask import render_template, request, redirect, url_for, session
-from app import app, helper
+from application import helper
+from application.appGenerator import get_app
+
+app = get_app()
 
 app.secret_key = '123'
 MAX_ATTEMPTS = 5
@@ -157,10 +160,10 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
 
     color = 'green' if guessed_value == chosen_value else 'red'
     icon = f'{guessed_value}_{color}' if isinstance(guessed_value, str) else f'{guessed_value}'
-    icon_path = os.path.join('app', 'static', 'img', 'icons', icon_dir, icon)
+    icon_path = os.path.join('application', 'static', 'img', 'icons', icon_dir, icon)
 
     if create_text and not os.path.exists(icon_path):
-        helper.create_text_image(str(guessed_value), color, directory=f'app/static/img/icons/{icon_dir}/')
+        helper.create_text_image(str(guessed_value), color, directory=f'application/static/img/icons/{icon_dir}/')
     return helper.icon_img_feedback(icon, directory=icon_dir)
 
 def clear_imgs():

@@ -11,8 +11,11 @@ Usage:
     from app import app, db
 """
 from flask import Flask
+# from application import views
 
 app = Flask(__name__)
 app.secret_key = '123'
 
-from app import views
+
+def get_app():
+    return app

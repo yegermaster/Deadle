@@ -17,7 +17,9 @@ import cartopy.crs as ccrs
 BASE_DIR = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
 sys.path.append(BASE_DIR)
 
-from app import app
+from application.appGenerator import get_app
+
+app = get_app()
 
 def resize_img(path: str, size: tuple) -> None:
     """Resizes and image and save it."""    
@@ -82,7 +84,7 @@ def load_wiki_image(image_url, wiki_url, headers):
         image_response.raise_for_status()
 
         base_dir = os.path.abspath('')
-        image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
+        image_path = os.path.join(base_dir, 'application', 'static', 'img', 'wiki_img')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
         image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg') # saving the image with its own name
@@ -153,16 +155,16 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
 
 def handle_globe_img(filename, color):
     """Handle the globe image by adding a border and resizing it."""
-    img = Image.open(f'app/static/img/icons/globe/{filename}.png')
+    img = Image.open(f'application/static/img/icons/globe/{filename}.png')
     d = ImageDraw.Draw(img)
     d.rectangle((0,0, img.width, img.height), outline=color, width=5)
     new_img = img.resize((100, 100))
-    new_img.save(f'app/static/img/icons/globe/{filename}.png')
+    new_img.save(f'application/static/img/icons/globe/{filename}.png')
 
 def plot_location_on_globe(latitude, longitude, filename, color):
     """Plot the location on a globe and save the image."""
     if np.isnan(latitude) or np.isnan(longitude):
-        create_text_image('nan', color=color, directory='app/static/img/icons/globe/')
+        create_text_image('nan', color=color, directory='application/static/img/icons/globe/')
     else:
         fig = plt.figure(figsize=(5, 5), facecolor='#262A34')
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(longitude, latitude))
@@ -179,7 +181,7 @@ def plot_location_on_globe(latitude, longitude, filename, color):
 
 def clear_dir(dir_name):
     """Delete all files inside the given directory within the static/img directory, without removing subdirectories."""
-    base_dir = os.path.join('app', 'static', 'img')
+    base_dir = os.path.join('application', 'static', 'img')
     dir_path = os.path.join(base_dir, dir_name)
 
     print(f"Checking directory: {dir_path}")  # Debugging line to check the path

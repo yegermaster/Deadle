@@ -5,12 +5,12 @@ and generating images for the Deadle web game.
 import os
 import sys
 import requests
+from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 from flask import url_for
-from datetime import datetime, timedelta
 import cartopy.crs as ccrs
 
 # Set up base directory for handling paths
@@ -122,18 +122,22 @@ def icon_img_feedback(icon:str, directory) -> str:
 
 def create_text_image(text: str, color: str, directory: str) -> Image:
     """Create an image with text and save it."""
+    # Make sure we have text
     try:
         if text is None:
             text = "Unknown"
     except TypeError as e:
         print(f'Error {e}')
 
+    # Creating new image
     img  = Image.new('RGB', (150, 75), color = '#262A34')
     d = ImageDraw.Draw(img)
 
+    # Defining font arttibutes
     font_path = os.path.join(app.root_path, 'static', 'css', 'youmurdererbb_reg.ttf')
     font_size = 40
 
+    # Writing the text on the image and fiiting in
     while True:
         font = ImageFont.truetype(font_path, size=font_size)
         text_width, text_height = d.textbbox((0, 0), text, font=font)[2:]
@@ -148,8 +152,9 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
 
     thickness = 5
     d.rectangle((0, 0, img.width, img.height), outline=color, width= thickness)
-    image_file_path = os.path.join(directory, f"{text}_{color}.png")
-    img.save(image_file_path)
+    os.makedirs(os.path.dirname(directory), exist_ok=True)
+    img.save(directory)
+    print("saved")
 
 def handle_globe_img(filename, color):
     """Handle the globe image by adding a border and resizing it."""

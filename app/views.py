@@ -6,8 +6,11 @@ It includes game initialization, user input processing, and feedback generation.
 import os
 import random
 import pandas as pd
-from flask import render_template, request, redirect, url_for, session
-from app import app, helper
+from flask import render_template, request, redirect, url_for, session, flash, jsonify
+from flask_login import login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from app import app, helper, db, login_manager
+from app.models import User
 
 app.secret_key = '123'
 MAX_ATTEMPTS = 5
@@ -17,8 +20,52 @@ def load_data():
     df = pd.read_excel(r'data/dead_db.xlsx', dtype={'deathyear': 'Int64'}) # reading
     return df["Name"].tolist(), df
 
+# Load data and store it in memory
 my_list, data_frame = load_data()
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handle login logic"""
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('index'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Handle user registration logic"""
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Your account has been created! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Handle user logout logic"""
+    logout_user()
+    return redirect(url_for('index'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Load user by ID for Flask-Login"""
+    return User.query.get(int(user_id))
+
+@app.route('/check-auth')
+def check_auth():
+    return jsonify({'is_authenticated': current_user.is_authenticated})
 
 @app.route('/reset')
 def reset():
@@ -27,8 +74,8 @@ def reset():
     session.clear()
     return redirect(url_for('index'))
 
-
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     """Route for the main game page handling GET and POST requests."""
     if 'guess_attempts' not in session or 'target_info' not in session:
@@ -56,13 +103,12 @@ def index():
                 feedback += " The historical figure was: " + target.get('Name', 'Unknown')
 
 
-    return render_template('index.html',
+    return render_template('index.html',user=current_user, 
                            feedback=feedback,
                            my_list=my_list,
                            guess_history=session.get('guess_history', []),
                            image_filename=session.get('image_filename', ''),
                            MAX_ATTEMPTS=MAX_ATTEMPTS)
-
 
 def initialize_game():
     """Initializes the game with random choice"""
@@ -95,14 +141,17 @@ def get_death_feedback(guessed_row):
     guessed_death = int(guessed_row['deathyear'])
     chosen_death = int(session['target_info']['deathyear'])
     diff = guessed_death - chosen_death
+    # Setting color thershold values
+    g = 10
+    y = 500
     if diff == 0:
         icon_image = None
         death_feedback = f"✅ Correct: {guessed_death}"
     elif diff > 0:
         # allready dead
-        if diff < 100:
+        if diff < g:
             icon = 'green'
-        elif 100 <= diff <= 500:
+        elif g <= diff <= y:
             icon = 'yellow'
         else:
             icon = 'red'
@@ -110,9 +159,9 @@ def get_death_feedback(guessed_row):
         death_feedback = guessed_death
     else:
         # still alive
-        if abs(diff) < 100:
+        if abs(diff) < g:
             icon = 'green'
-        elif 100 <= abs(diff) <= 500:
+        elif g <= abs(diff) <= y:
             icon = 'yellow'
         else:
             icon = 'red'
@@ -120,7 +169,6 @@ def get_death_feedback(guessed_row):
         death_feedback = guessed_death
     
     return death_feedback, icon_image
-
 
 def get_country_img(guessed_row):
     """Gets the correct country img output"""
@@ -171,7 +219,6 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     if create_text and not os.path.exists(icon_path):
         helper.create_text_image(str(guessed_value), color, directory=os.path.dirname(icon_path))
     return helper.icon_img_feedback(icon, directory=icon_dir)
-
 
 def clear_imgs():
     """Clears images from directories."""

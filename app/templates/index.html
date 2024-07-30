@@ -11,26 +11,26 @@
 </head>
 <body>
     <div class="container">
-        <!-- Logo and title-->
-    <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="logo">
+        <!-- Logo and title -->
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="logo">
         <h1>Guess the Historical Figure</h1>
 
-        <!-- About button to open modal-->
+        <!-- About button to open modal -->
         <button id="aboutBtn" style="background: none; border: none; padding: 0;">
             <img src="{{ url_for('static', filename='img/about.png') }}" alt="About" style="width: 100px; height: auto;">
         </button>
         
-        <!-- Help help to open modal-->
+        <!-- Help button to open modal -->
         <button id="helpBtn" style="background: none; border: none; padding: 0;">
             <img src="{{ url_for('static', filename='img/help.png') }}" alt="Help" style="width: 100px; height: auto;">
         </button>
 
-        <!-- Stats help to open modal-->
+        <!-- Stats button to open modal -->
         <button id="statsBtn" style="background: none; border: none; padding: 0;">
             <img src="{{ url_for('static', filename='img/stats.png') }}" alt="Stats" style="width: 100px; height: auto;">
         </button>
 
-        <!-- Guess form-->
+        <!-- Guess form -->
         <form method="post" class="guess-form">
             <input type="text" name="guess" list="name-options" autocomplete="off" required>
             <datalist id="name-options">
@@ -41,12 +41,12 @@
             <button type="submit">Guess</button>
         </form>
 
-        <!-- Feedback message-->
+        <!-- Feedback message -->
         {% if feedback %}
             <p>{{ feedback|safe }}</p>
         {% endif %}
 
-        <!-- Guess feedback tale-->
+        <!-- Guess feedback table -->
         <table>
             <thead>
                 <tr>
@@ -62,7 +62,7 @@
                 {% for guess in guess_history %}
                     <tr>
                         <td>{{ guess['name'] }}</td>
-                        <td>{{ guess['gender_feedback']|safe }} </td>
+                        <td>{{ guess['gender_feedback']|safe }}</td>
                         <td>{{ guess['death_feedback'] }} {{ guess['death_img']|safe }}</td>
                         <td>{{ guess['occupation_feedback']|safe }}</td>
                         <td>{{ guess['country_feedback']|safe }}</td>
@@ -72,7 +72,7 @@
             </tbody>
         </table>
 
-        <!-- Reveal information-->
+        <!-- Reveal information -->
         {% if session.get('reveal', False) %}
             <div class="reveal-info">
                 <h2>The historical figure was:</h2>
@@ -83,80 +83,82 @@
                 <p>Death Year: {{ session['target_info']['deathyear'] }}</p>
                 <p>Occupation: {{ session['target_info']['occupation'] }}</p>
                 {% if session.get('image_filename') %}
-                    <img src="{{ url_for('static', filename='img/wiki_img/'+ session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
+                    <img src="{{ url_for('static', filename='img/wiki_img/' + session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
                 {% endif %}
             </div>
         {% endif %}
 
-        <!-- Reset game button-->
+        <!-- Reset game button -->
         {% if guess_history|length >= MAX_ATTEMPTS %}
             <button onclick="window.location.href='/reset';">Reset Game</button>
         {% endif %}
 
-
-        <!-- Modal structure-->
+        <!-- Modal structure -->
         <div id="aboutModal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
+                <span class="close" data-modal="about">&times;</span>
                 <h1>About This Game</h1>
-                <p> Welcome to Deadle!
-                    Deadle is a web game inspired by Wordle, where players guess historical figures based on given clues.
-                    With each attempt, players receive feedback, helping them narrow down their options.
-                    Ideal for history enthusiasts, Deadle offers an educational and entertaining experience by connecting players with notable personalities from various eras and regions.
-                    </p>
+                <p>Welcome to Deadle! Deadle is a web game inspired by Wordle, where players guess historical figures based on given clues. With each attempt, players receive feedback, helping them narrow down their options. Ideal for history enthusiasts, Deadle offers an educational and entertaining experience by connecting players with notable personalities from various eras and regions.</p>
             </div>
         </div>
 
         <div id="helpModal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
+                <span class="close" data-modal="help">&times;</span>
                 <h1>How to play?</h1>
                 <p>1. Guess the historical figure based on the provided clues (start with a random one).</p>
-                <p>2. Use the clues about gender, occupation and ofcourse the death year to narrow down your options.</p>
-                <p>3. Submit your guess and see if you’re correct!.</p>
-                <p>4. Try to do so with as little tries as possible.</p>
-                <p>5. New historical figure released every day at midnight!</p>
+                <p>2. Use the clues about gender, occupation, and of course the death year to narrow down your options.</p>
+                <p>3. Submit your guess and see if you’re correct!</p>
+                <p>4. Try to do so with as few tries as possible.</p>
+                <p>5. A new historical figure is released every day at midnight!</p>
                 <h2>Color Meanings</h2>
                 <div class="color-meaning">
                     <div class="color-item">
-                        <span class="color-box green"></span>
-                        The guessed year is within 100 years of the correct year.
+                        <span class="color-box green"></span> The guessed year is within 10 years of the correct year.
                     </div>
                     <div class="color-item">
-                        <span class="color-box yellow"></span>
-                       The guessed year is 100 to 500 years off from the correct year.
+                        <span class="color-box yellow"></span> The guessed year is 10 to 500 years off from the correct year.
                     </div>
                     <div class="color-item">
-                        <span class="color-box red"></span>
-                        The guessed year is more than 500 years off from the correct year.
+                        <span class="color-box red"></span> The guessed year is more than 500 years off from the correct year.
                     </div>
                     <div class="color-item">
-                        <span class="color-box grey"></span>
-                        <strong>"Still alive"</strong> Used when the guessed year is before the actual death year.
+                        <span class="color-box grey"></span> <strong>"Still alive"</strong> Used when the guessed year is before the actual death year.
                     </div>
                     <div class="color-item">
-                        <span class="color-box grey"></span>
-                        <strong>"Already dead"</strong> Used when the guessed year is after the actual death year.
+                        <span class="color-box grey"></span> <strong>"Already dead"</strong> Used when the guessed year is after the actual death year.
                     </div>
                 </div>
             </div>
         </div>
         
-
         <div id="statsModal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
+                <span class="close" data-modal="stats">&times;</span>
                 <h1>Stats</h1>
-                <p> Statisic:
-                    * *
-                    * *
-                    </p>
+                <p>Username: X</p>
+                <p>Number of successful games: X.</p>
+                <p>Number of total games: X</p>
+                <p>Number of total guesses: X</p>
             </div>
         </div>
     </div>
 
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-modal="login">&times;</span>
+            <h2>Login Required</h2>
+            <form method="POST" action="{{ url_for('login') }}">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br>
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    
-    
 </body>
 </html>

@@ -8,7 +8,8 @@ const getByClass = (element, className) => element.getElementsByClassName(classN
 const modals = {
     about: getById("aboutModal"),
     help: getById("helpModal"),
-    stats: getById("statsModal")
+    stats: getById("statsModal"),
+    login: getById("loginModal")
 };
 
 const buttons = {
@@ -17,40 +18,77 @@ const buttons = {
     stats: getById("statsBtn")
 };
 
-// Close buttons
-const closeButtons = {
-    about: getByClass(modals.about, "close"),
-    help: getByClass(modals.help, "close"),
-    stats: getByClass(modals.stats, "close")
+// Open and close modal functions
+const openModal = modal => {
+    console.log(`Opening modal: ${modal.id}`);
+    modal.style.display = "block";
 };
 
-/**
- * Open modal.
- * @param {HTMLElement} modal - The modal element to show.
- */
-const openModal = modal => modal.style.visibility = "visible";
+const closeModal = modal => {
+    console.log(`Closing modal: ${modal.id}`);
+    modal.style.display = "none";
+};
 
-/**
- * Close modal.
- * @param {HTMLElement} modal - The modal element to hide.
- */
-const closeModal = modal => modal.style.visibility = "hidden";
-
-// Attach event listeners to buttons
-buttons.about.onclick = () => openModal(modals.about);
-buttons.help.onclick = () => openModal(modals.help);
-buttons.stats.onclick = () => openModal(modals.stats);
-
-// Attach event listeners to close buttons
-closeButtons.about.onclick = () => closeModal(modals.about);
-closeButtons.help.onclick = () => closeModal(modals.help);
-closeButtons.stats.onclick = () => closeModal(modals.stats);
+// Ensure modals are initially hidden
+Object.values(modals).forEach(modal => {
+    if (modal) {
+        modal.style.display = "none";
+    }
+});
 
 // Close modals when clicking outside
 window.onclick = function(event) {
     Object.values(modals).forEach(modal => {
-        if (event.target === modal) {
+        if (modal && event.target === modal && modal !== modals.login) { // Prevent closing login modal
             closeModal(modal);
         }
     });
 };
+
+// Attach event listeners to buttons
+Object.keys(buttons).forEach(key => {
+    const button = buttons[key];
+    if (button) {
+        button.onclick = () => {
+            console.log(`Button clicked: ${key}`);
+            openModal(modals[key]);
+        };
+    }
+});
+
+// Close modal when close button is clicked
+document.querySelectorAll('.close').forEach(btn => {
+    btn.onclick = function() {
+        const modalId = this.dataset.modal + "Modal";
+        console.log(`Close button clicked, closing modal: ${modalId}`);
+        closeModal(getById(modalId));
+    };
+});
+
+window.onload = function() {
+    fetch('/check-auth')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.is_authenticated) {
+                openModal(modals.login);
+            }
+        })
+        .catch(error => console.error('Error checking authentication:', error));
+};
+
+
+// Test function to verify modal functionality
+const testModals = () => {
+    console.log("Testing modals:");
+    Object.keys(buttons).forEach(key => {
+        buttons[key].click();
+        console.log(`${key} modal should be visible.`);
+        setTimeout(() => {
+            console.log(`${key} modal should be hidden.`);
+            closeModal(modals[key]);
+        }, 2000); // Hide after 2 seconds
+    });
+};
+
+// Uncomment to test modals
+// testModals();

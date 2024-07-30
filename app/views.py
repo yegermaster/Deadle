@@ -98,18 +98,27 @@ def get_death_feedback(guessed_row):
     if diff == 0:
         icon_image = None
         death_feedback = f"✅ Correct: {guessed_death}"
-    elif abs(diff) <= 100:
-        icon = 'green' if diff < 0 else 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
-        death_feedback = guessed_death
-    elif abs(diff) <= 500:
-        icon = 'yellow' if diff < 0 else 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
+    elif diff > 0:
+        # allready dead
+        if diff < 100:
+            icon = 'green'
+        elif 100 <= diff <= 500:
+            icon = 'yellow'
+        else:
+            icon = 'red'
+        icon_image = helper.icon_img_feedback(icon=f'already_dead_{icon}', directory='deaths')
         death_feedback = guessed_death
     else:
-        icon = 'red'
-        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}' if diff < 0 else f'already_dead_{icon}', directory='deaths')
+        # still alive
+        if abs(diff) < 100:
+            icon = 'green'
+        elif 100 <= abs(diff) <= 500:
+            icon = 'yellow'
+        else:
+            icon = 'red'
+        icon_image = helper.icon_img_feedback(icon=f'still_alive_{icon}', directory='deaths')
         death_feedback = guessed_death
+    
     return death_feedback, icon_image
 
 
@@ -143,10 +152,8 @@ def generate_feedback(guessed_row):
     })
     return feedback
 
-
 def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     """Gets the feedback for a specific attribute."""
-    # Check if the attribute value is a string before calling lower()
     print("getting feedback")
     guessed_value = guessed_row[attribute]
     if isinstance(guessed_value, str):
@@ -162,8 +169,9 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     print(f"icon:, {icon} - icon_path:, {icon_path} - icon_dir:, {icon_dir} - os: {os.path.exists}")
 
     if create_text and not os.path.exists(icon_path):
-        helper.create_text_image(str(guessed_value), color, directory=icon_path)
+        helper.create_text_image(str(guessed_value), color, directory=os.path.dirname(icon_path))
     return helper.icon_img_feedback(icon, directory=icon_dir)
+
 
 def clear_imgs():
     """Clears images from directories."""

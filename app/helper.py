@@ -122,39 +122,43 @@ def icon_img_feedback(icon:str, directory) -> str:
 
 def create_text_image(text: str, color: str, directory: str) -> Image:
     """Create an image with text and save it."""
-    # Make sure we have text
     try:
         if text is None:
             text = "Unknown"
     except TypeError as e:
         print(f'Error {e}')
 
-    # Creating new image
-    img  = Image.new('RGB', (150, 75), color = '#262A34')
+    img = Image.new('RGB', (150, 75), color='#262A34')
     d = ImageDraw.Draw(img)
 
-    # Defining font arttibutes
     font_path = os.path.join(app.root_path, 'static', 'css', 'youmurdererbb_reg.ttf')
     font_size = 40
 
-    # Writing the text on the image and fiiting in
     while True:
         font = ImageFont.truetype(font_path, size=font_size)
         text_width, text_height = d.textbbox((0, 0), text, font=font)[2:]
         if text_width <= img.width - 15 and text_height <= img.height - 15:
             break
-        font_size -=1
-    
+        font_size -= 1
+
     text_x = (img.width - text_width) / 2
     text_y = (img.height - text_height) / 2
     d.text((text_x - 1, text_y - 1), text, font=font, fill=(0, 0, 0))
-    d.text((text_x-2, text_y), text, font=font, fill=(250,0,0))
+    d.text((text_x - 2, text_y), text, font=font, fill=(250, 0, 0))
 
     thickness = 5
-    d.rectangle((0, 0, img.width, img.height), outline=color, width= thickness)
+    d.rectangle((0, 0, img.width, img.height), outline=color, width=thickness)
+    print("trying to save")
+
+    # Ensure the directory exists
     os.makedirs(os.path.dirname(directory), exist_ok=True)
-    img.save(directory)
-    print("saved")
+
+    # Add the filename with the .png extension
+    file_path = os.path.join(directory, f"{text.lower()}_{color}.png")
+
+    img.save(file_path)
+
+
 
 def handle_globe_img(filename, color):
     """Handle the globe image by adding a border and resizing it."""

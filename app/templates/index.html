@@ -111,14 +111,37 @@
             <div class="modal-content">
                 <span class="close">&times;</span>
                 <h1>How to play?</h1>
-                <p> 1. Try to guess the player in 5 guesses.
-                    2. Green is an exact match.
-                    3. Yellow is a close match.
-                    4. Red is not even close.
-                    5. new historical figure released every day at midnight!
-                    </p>
+                <p>1. Guess the historical figure based on the provided clues (start with a random one).</p>
+                <p>2. Use the clues about gender, occupation and ofcourse the death year to narrow down your options.</p>
+                <p>3. Submit your guess and see if you’re correct!.</p>
+                <p>4. Try to do so with as little tries as possible.</p>
+                <p>5. New historical figure released every day at midnight!</p>
+                <h2>Color Meanings</h2>
+                <div class="color-meaning">
+                    <div class="color-item">
+                        <span class="color-box green"></span>
+                        The guessed year is within 100 years of the correct year.
+                    </div>
+                    <div class="color-item">
+                        <span class="color-box yellow"></span>
+                       The guessed year is 100 to 500 years off from the correct year.
+                    </div>
+                    <div class="color-item">
+                        <span class="color-box red"></span>
+                        The guessed year is more than 500 years off from the correct year.
+                    </div>
+                    <div class="color-item">
+                        <span class="color-box grey"></span>
+                        <strong>"Still alive"</strong> Used when the guessed year is before the actual death year.
+                    </div>
+                    <div class="color-item">
+                        <span class="color-box grey"></span>
+                        <strong>"Already dead"</strong> Used when the guessed year is after the actual death year.
+                    </div>
+                </div>
             </div>
         </div>
+        
 
         <div id="statsModal" class="modal">
             <div class="modal-content">

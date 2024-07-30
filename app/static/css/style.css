@@ -226,3 +226,48 @@ tr:hover {
     padding: 0; 
     cursor: pointer;
 }
+
+.color-meaning {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.color-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.color-box.green {
+    background-color: green;
+}
+
+.color-box.yellow {
+    background-color: yellow;
+}
+
+.color-box.red {
+    background-color: red;
+}
+
+.color-box.green {
+    background-color: green;
+}
+
+.color-box.grey {
+    background-color: grey;
+}
+
+.modal-content h2 {
+    font-size: 1.5em;
+    margin-top: 20px;
+    color: #61dafb;
+}

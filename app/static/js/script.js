@@ -21,8 +21,9 @@ const buttons = {
 // Open and close modal functions
 const openModal = modal => {
     console.log(`Opening modal: ${modal.id}`);
-    modal.style.display = "block";
+    modal.style.display = "flex";
 };
+
 
 const closeModal = modal => {
     console.log(`Closing modal: ${modal.id}`);

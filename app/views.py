@@ -2,7 +2,6 @@
 This module handles the routes and core functionality for the Deadle web game.
 It includes game initialization, user input processing, and feedback generation.
 """
-
 import os
 import random
 import pandas as pd
@@ -71,7 +70,16 @@ def check_auth():
 def reset():
     """Route to reset the game session and redirects to the index page"""
     clear_imgs()
+    user_id = session.get('_user_id')  # Preserve the user_id
     session.clear()
+    session['_user_id'] = user_id  # Restore the user_id
+
+    # Reset user stats
+    user = User.query.get(user_id)
+    user.is_playing = False
+    user.current_guess_count = 0
+    db.session.commit()
+
     return redirect(url_for('index'))
 
 @app.route('/', methods=['GET', 'POST'])
@@ -81,7 +89,7 @@ def index():
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
 
-    feedback = ''  # Ensure feedback is always initialized to an empty string
+    feedback = ''
     if request.method == 'POST':
         guess_name = request.form.get('guess')
         if guess_name:
@@ -92,23 +100,31 @@ def index():
                 feedback = process_feedback  # Ensure we only assign non-None feedback
             if attempts >= MAX_ATTEMPTS - 1:
                 session['reveal'] = True
-                print("Reveal set to True")
                 wiki_url = target.get('Link', '')
                 image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
                 image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
                 if not os.path.exists(image_path) and wiki_url:
                     helper.download_image(wiki_url)
                 session['image_filename'] = image_filename
-                print("Image filename in session:", session['image_filename'])
                 feedback += " The historical figure was: " + target.get('Name', 'Unknown')
-
-
+    
+    # Fetch user stats
+    user = current_user
+    user_stats = {
+        'username': user.username,
+        'num_games': user.num_games,
+        'num_guesses': user.num_guesses,
+        'current_guess_count': user.current_guess_count,
+        'date_joined': user.date_joined.strftime('%Y-%m-%d')
+    }
+    
     return render_template('index.html',user=current_user, 
                            feedback=feedback,
                            my_list=my_list,
                            guess_history=session.get('guess_history', []),
                            image_filename=session.get('image_filename', ''),
-                           MAX_ATTEMPTS=MAX_ATTEMPTS)
+                           MAX_ATTEMPTS=MAX_ATTEMPTS,
+                           user_stats=user_stats)
 
 def initialize_game():
     """Initializes the game with random choice"""
@@ -122,7 +138,7 @@ def initialize_game():
     session['target_info'] = dict_data_frame
 
 def process_guess(guess_name):
-    """Processes a single guess and handling the attempts"""
+    """Processes a single guess and handles the attempts"""
     guessed_row = data_frame[data_frame['Name'].str.upper() == guess_name.upper()]
     if guessed_row.empty:
         return 'Name not in list. Try again'
@@ -130,11 +146,37 @@ def process_guess(guess_name):
     session['guess_attempts'] += 1
     guessed_row = guessed_row.iloc[0].to_dict()
     feedback = generate_feedback(guessed_row)
-    session['guess_history'].append(feedback)
+
+    # Append feedback to guess history if not already present
+    if not any(guess['name'] == feedback['name'] for guess in session['guess_history']):
+        session['guess_history'].append(feedback)
+    
     session.modified = True
 
+    user = current_user
+    user.num_guesses += 1
+    user.current_guess_count += 1
+    db.session.commit()
+
+    if guessed_row['Name'].upper() == session['target_info']['Name'].upper():
+        user.num_games += 1
+        user.current_guess_count = 0
+        db.session.commit()
+
     if session['guess_attempts'] >= MAX_ATTEMPTS:
+        session['reveal'] = True
+        wiki_url = session['target_info'].get('Link', '')
+        image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
+        image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
+        if not os.path.exists(image_path) and wiki_url:
+            helper.download_image(wiki_url)
+        session['image_filename'] = image_filename
+        session.modified = True
         return 'Max attempts. Reset to start again '
+
+    return None
+
+
 
 def get_death_feedback(guessed_row):
     """Gets the correct death year img output"""
@@ -174,7 +216,6 @@ def get_country_img(guessed_row):
     """Gets the correct country img output"""
     guessed_country = guessed_row['countryName'].lower()
     chosen_country = session['target_info']['countryName']
-    print(guessed_country, chosen_country)
     lat, lan = guessed_row['latitude'], guessed_row['longitude']
     color = 'red' if guessed_country != chosen_country else 'green'
     helper.plot_location_on_globe(lat, lan, guessed_country, color)
@@ -191,7 +232,10 @@ def generate_feedback(guessed_row):
     }
     feedback = {}
     for key, (attr, directory, *args) in feedback_funcs.items():
-        feedback[key] = get_feedback(guessed_row, attr, directory, *args) if key != 'country_feedback' else get_country_img(guessed_row)
+        if key != 'country_feedback':
+            feedback[key] = get_feedback(guessed_row, attr, directory, *args)
+        else:
+            feedback[key] = get_country_img(guessed_row)
 
     feedback.update({
         'name': guessed_row['Name'],
@@ -202,7 +246,6 @@ def generate_feedback(guessed_row):
 
 def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     """Gets the feedback for a specific attribute."""
-    print("getting feedback")
     guessed_value = guessed_row[attribute]
     if isinstance(guessed_value, str):
         guessed_value = guessed_value.lower()
@@ -213,12 +256,14 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
 
     color = 'green' if guessed_value == chosen_value else 'red'
     icon = f'{guessed_value}_{color}' if isinstance(guessed_value, str) else f'{guessed_value}'
-    icon_path = os.path.join('app', 'static', 'img', 'icons', icon_dir, f'{icon}.png')
-    print(f"icon:, {icon} - icon_path:, {icon_path} - icon_dir:, {icon_dir} - os: {os.path.exists}")
+    icon_path = os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir, f'{icon}.png')
+    icon_url = url_for('static', filename=f'img/icons/{icon_dir}/{icon}.png')
+    icon_image = f"<img src='{icon_url}' alt='{icon}'>"
 
     if create_text and not os.path.exists(icon_path):
-        helper.create_text_image(str(guessed_value), color, directory=os.path.dirname(icon_path))
-    return helper.icon_img_feedback(icon, directory=icon_dir)
+        helper.create_text_image(str(guessed_value), color, os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir))
+
+    return icon_image
 
 def clear_imgs():
     """Clears images from directories."""

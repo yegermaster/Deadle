@@ -8,6 +8,8 @@ import requests
 from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 from flask import url_for

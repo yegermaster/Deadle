@@ -42,7 +42,7 @@
         </form>
 
         <!-- Feedback message -->
-        {% if feedback %}
+        {% if feedback and not session.get('reveal', False) %}
             <p>{{ feedback|safe }}</p>
         {% endif %}
 
@@ -71,7 +71,7 @@
                 {% endfor %}
             </tbody>
         </table>
-
+        
         <!-- Reveal information -->
         {% if session.get('reveal', False) %}
             <div class="reveal-info">
@@ -136,12 +136,13 @@
             <div class="modal-content">
                 <span class="close" data-modal="stats">&times;</span>
                 <h1>Stats</h1>
-                <p>Username: X</p>
-                <p>Number of successful games: X.</p>
-                <p>Number of total games: X</p>
-                <p>Number of total guesses: X</p>
+                <p>Username: <span id="username">{{ user_stats['username'] }}</span></p>
+                <p>Number of successful games: <span id="numGames">{{ user_stats['num_games'] }}</span></p>
+                <p>Number of total games: <span id="numGuesses">{{ user_stats['num_guesses'] }}</span></p>
+                <p>Current guess count: <span id="currentGuessCount">{{ user_stats['current_guess_count'] }}</span></p>
+                <p>Date joined: <span id="dateJoined">{{ user_stats['date_joined'] }}</span></p>
             </div>
-        </div>
+        </div>        
     </div>
 
     <div id="loginModal" class="modal">

@@ -40,3 +40,22 @@ degree                           int64
 clustering                     float64
 eigenCentrality                float64
 BCI                            float64
+
+
+Basic Algorithm
+
+    Initialization:
+        Load the historical figure of the day from the database.
+        Initialize the player's guess count and feedback.
+    Guess Submission:
+        Receive the player’s guess.
+        Compare the guessed details with the actual historical figure's attributes.
+        Update feedback based on the comparison.
+    Feedback Logic:
+        If the guess is correct, end the game and display a success message with figure details.
+        If incorrect, provide clues based on the discrepancy in attributes (gender, occupation, death year, etc.).
+    Game Continuation:
+        If the maximum number of guesses is reached without a correct guess, reveal the figure and reset the game.
+        Otherwise, allow the player to continue guessing based on the feedback.
+    Reset/Next Game Preparation:
+        Reset the game state at midnight or upon player request to start with a new historical figure.

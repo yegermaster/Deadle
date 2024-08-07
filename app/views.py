@@ -5,11 +5,16 @@ It includes game initialization, user input processing, and feedback generation.
 import os
 import random
 import pandas as pd
+import datetime as dt
 from flask import render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import app, helper, db, login_manager
 from app.models import User
+
+#TODO: Correct Guess scenerio
+#TODO: Fix the stats modal
+#TODO: Add timer for the app
 
 app.secret_key = '123'
 MAX_ATTEMPTS = 5
@@ -95,9 +100,13 @@ def index():
         if guess_name:
             attempts = session.get('guess_attempts', 0)
             target = session.get('target_info', {})
-            process_feedback = process_guess(guess_name)  # Capture the feedback from guessing
+            guessed_row = data_frame[data_frame['Name'].str.upper() == guess_name.upper()]  # Fetch the guessed row
+            if not guessed_row.empty:
+                guessed_row = guessed_row.iloc[0].to_dict()  # Convert to dictionary if not empty
+                process_feedback = process_guess(guess_name)  # Capture the feedback from guessing
             if process_feedback:
-                feedback = process_feedback  # Ensure we only assign non-None feedback
+                feedback = process_feedback
+            # Checks if reached max attempts
             if attempts >= MAX_ATTEMPTS - 1:
                 session['reveal'] = True
                 wiki_url = target.get('Link', '')
@@ -107,7 +116,18 @@ def index():
                     helper.download_image(wiki_url)
                 session['image_filename'] = image_filename
                 feedback += " The historical figure was: " + target.get('Name', 'Unknown')
-    
+            # Check if the guess is correct
+            if guessed_row['Name'].upper() == session['target_info']['Name'].upper():
+                feedback = 'Correct! You have guessed the right historical figure.'
+                session['reveal'] = True
+                user = current_user
+                user.num_games += 1
+                user.wins += 1  # Ensure 'wins' is part of your user model
+                db.session.commit()
+                flash('Congratulations! You guessed correctly.', 'success')
+                return redirect(url_for('index'))  # Redirect to the main page or a success page
+
+        
     # Fetch user stats
     user = current_user
     user_stats = {
@@ -115,6 +135,7 @@ def index():
         'num_games': user.num_games,
         'num_guesses': user.num_guesses,
         'current_guess_count': user.current_guess_count,
+        'num_wins': user.wins,
         'date_joined': user.date_joined.strftime('%Y-%m-%d')
     }
     
@@ -128,6 +149,7 @@ def index():
 
 def initialize_game():
     """Initializes the game with random choice"""
+    today = dt.date.today()
     session['guess_attempts'] = 0
     session['guess_history'] = []
     r = random.randint(0, len(data_frame) - 1) # choosing random number from the list
@@ -175,8 +197,6 @@ def process_guess(guess_name):
         return 'Max attempts. Reset to start again '
 
     return None
-
-
 
 def get_death_feedback(guessed_row):
     """Gets the correct death year img output"""

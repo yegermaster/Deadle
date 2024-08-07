@@ -7,7 +7,7 @@ Loads data, processes it, and exports results to an Excel file.
 import os
 import sys
 import pandas as pd
-from app import helper
+from DEADLE import *
 
 
 # Set up base directory for handling paths

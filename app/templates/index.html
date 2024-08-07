@@ -85,8 +85,13 @@
                 {% if session.get('image_filename') %}
                     <img src="{{ url_for('static', filename='img/wiki_img/' + session['image_filename']) }}" alt="Historical Figure" style="max-width:100%;height:auto;" />
                 {% endif %}
+                {% if feedback == 'Correct! You have guessed the right historical figure.' %}
+                    <p style="color: green;">{{ feedback }}</p>
+                    <button onclick="window.location.href='{{ url_for("reset") }}';">Play Again</button>
+                {% endif %}
             </div>
         {% endif %}
+
 
         <!-- Reset game button -->
         {% if guess_history|length >= MAX_ATTEMPTS %}
@@ -137,9 +142,10 @@
                 <span class="close" data-modal="stats">&times;</span>
                 <h1>Stats</h1>
                 <p>Username: <span id="username">{{ user_stats['username'] }}</span></p>
-                <p>Number of successful games: <span id="numGames">{{ user_stats['num_games'] }}</span></p>
-                <p>Number of total games: <span id="numGuesses">{{ user_stats['num_guesses'] }}</span></p>
-                <p>Current guess count: <span id="currentGuessCount">{{ user_stats['current_guess_count'] }}</span></p>
+                <p>Current guesses count: <span id="currentGuessCount">{{ user_stats['current_guess_count'] }}</span></p>
+                <p>Total guesses count: <span id="numGuesses">{{ user_stats['num_guesses'] }}</span></p>
+                <p>Games count: <span id="numGames">{{ user_stats['num_games'] }}</span></p>
+                <p>Successful games: <span id="numGames">{{ user_stats['num_games'] }}</span></p>
                 <p>Date joined: <span id="dateJoined">{{ user_stats['date_joined'] }}</span></p>
             </div>
         </div>        

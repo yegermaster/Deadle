@@ -40,7 +40,7 @@ Object.values(modals).forEach(modal => {
 // Close modals when clicking outside
 window.onclick = function(event) {
     Object.values(modals).forEach(modal => {
-        if (modal && event.target === modal && modal !== modals.login) { // Prevent closing login modal
+        if (modal && event.target === modal && modal !== modals.login) {
             closeModal(modal);
         }
     });

@@ -1,3 +1,7 @@
+"""
+This module creates a class for the user to keep track his login data and game statisitcs.
+"""
+
 from datetime import datetime
 from app import db
 from flask_login import UserMixin

@@ -39,7 +39,7 @@ body {
     color: #fff;
     border: 1px solid #444;
     border-radius: 20px;
-    margin-bottom: 20px; /* Adjusted for consistency */
+    margin-bottom: 20px;
 }
 
 /* Button styling for guess form */
@@ -47,16 +47,16 @@ body {
     padding: 10px 15px;
     font-size: 16px;
     border-radius: 20px;
-    margin: 0 auto; /* Centers button */
-    display: block; /* Ensures button is on its own line */
+    margin: 0 auto;
+    display: block;
 }
 
 /* Styling for feedback and guess cards */
 .feedback, .guess-card {
     background-color: #333;
     border-radius: 10px;
-    padding: 20px 15px; /* Increased padding for more internal space */
-    margin-bottom: 20px; /* Increased space between cards */
+    padding: 20px 15px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     font-size: 14px;
 }
@@ -65,7 +65,7 @@ body {
 .guess-card {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px; /* Increased gap for better separation */
+    gap: 20px;
     align-items: center;
 }
 
@@ -103,13 +103,13 @@ table {
 th, td {
     text-align: left;
     padding: 8px;
-    border-bottom: 1px solid #ddd; /* Adds a light line between rows */
+    border-bottom: 1px solid #ddd;
 }
 
 /* Row hover effect */
 tr:hover {
-    background-color: #1A1A2E; /* highlights row on hover */
-} 
+    background-color: #1A1A2E;
+}
 
 /* Specific styles for spacing inside the feedback lines */
 .guess-history-entry {
@@ -128,7 +128,7 @@ tr:hover {
     }
 
     .container {
-        padding: 10px; /* Adjusts padding for smaller screens */
+        padding: 10px;
     }
 }
 
@@ -136,7 +136,7 @@ tr:hover {
 .button-group {
     display: flex;
     justify-content: center;
-    gap: 10px; /* Adjust the spacing between buttons as needed */
+    gap: 10px;
 }
 
 .info-button img {
@@ -144,7 +144,6 @@ tr:hover {
     height: auto;
     cursor: pointer;
 }
-
 
 /* Modal styles */
 .modal {
@@ -174,19 +173,6 @@ tr:hover {
     animation: fadeIn 0.3s;
 }
 
-
-.modal-content h1, .modal-content h2 {
-    color: #61dafb;
-}
-
-.modal-content p, .modal-content label {
-    margin: 10px 0;
-}
-
-.modal-content input[type="text"], .modal-content input[type="password"], .modal-content button {
-    margin: 10px 0;
-}
-
 .close {
     color: #aaa;
     float: right;
@@ -206,22 +192,20 @@ tr:hover {
     to {opacity: 1;}
 }
 
-/* buttons styling */
-#aboutBtn {
-    background: none;
-    border: none; 
-    padding: 0; 
-    cursor: pointer;
+.modal-content h1, .modal-content h2 {
+    color: #61dafb;
 }
 
-#helpBtn {
-    background: none;
-    border: none; 
-    padding: 0; 
-    cursor: pointer;
+.modal-content p, .modal-content label {
+    margin: 10px 0;
 }
 
-#statsBtn {
+.modal-content input[type="text"], .modal-content input[type="password"], .modal-content button {
+    margin: 10px 0;
+}
+
+/* Buttons styling */
+#aboutBtn, #helpBtn, #statsBtn {
     background: none;
     border: none; 
     padding: 0; 
@@ -257,10 +241,6 @@ tr:hover {
 
 .color-box.red {
     background-color: red;
-}
-
-.color-box.green {
-    background-color: green;
 }
 
 .color-box.grey {

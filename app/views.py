@@ -93,7 +93,8 @@ def index():
     """Route for the main game page handling GET and POST requests."""
     if 'guess_attempts' not in session or 'target_info' not in session:
         initialize_game()
-
+    
+    user = current_user
     feedback = ''
     if request.method == 'POST':
         guess_name = request.form.get('guess')
@@ -106,9 +107,12 @@ def index():
                 process_feedback = process_guess(guess_name)  # Capture the feedback from guessing
             if process_feedback:
                 feedback = process_feedback
+
             # Checks if reached max attempts
             if attempts >= MAX_ATTEMPTS - 1:
                 session['reveal'] = True
+                user.num_games +=1
+                db.session.commit()
                 wiki_url = target.get('Link', '')
                 image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
                 image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
@@ -120,16 +124,14 @@ def index():
             if guessed_row['Name'].upper() == session['target_info']['Name'].upper():
                 feedback = 'Correct! You have guessed the right historical figure.'
                 session['reveal'] = True
-                user = current_user
                 user.num_games += 1
-                user.wins += 1  # Ensure 'wins' is part of your user model
+                user.wins += 1
                 db.session.commit()
                 flash('Congratulations! You guessed correctly.', 'success')
                 return redirect(url_for('index'))  # Redirect to the main page or a success page
 
         
     # Fetch user stats
-    user = current_user
     user_stats = {
         'username': user.username,
         'num_games': user.num_games,
@@ -169,12 +171,10 @@ def process_guess(guess_name):
     guessed_row = guessed_row.iloc[0].to_dict()
     feedback = generate_feedback(guessed_row)
 
-    # Append feedback to guess history if not already present
     if not any(guess['name'] == feedback['name'] for guess in session['guess_history']):
         session['guess_history'].append(feedback)
     
     session.modified = True
-
     user = current_user
     user.num_guesses += 1
     user.current_guess_count += 1

@@ -1,9 +1,12 @@
+"""
+This module handles the game logic of the Deadle web game.
+"""
+
 import os
 import random
-import datetime as dt
 import pandas as pd
 from flask import session, flash, redirect, url_for
-from app import app, helper, db  # Import the Flask app instance
+from app import app, helper, db
 from app.models import User
 
 MAX_ATTEMPTS = 5
@@ -137,7 +140,9 @@ def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     icon_image = f"<img src='{icon_url}' alt='{icon}'>"
 
     if create_text and not os.path.exists(icon_path):
-        helper.create_text_image(str(guessed_value), color, os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir))
+        helper.create_text_image(str(guessed_value),
+                                  color,
+                                    os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir))
 
     return icon_image
 

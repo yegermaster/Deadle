@@ -1,3 +1,7 @@
+"""
+This module handles the authentication logic of the Deadle web game.
+"""
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -49,4 +53,5 @@ def load_user(user_id):
 
 @auth.route('/check-auth')
 def check_auth():
+    """Check if user is authnticated"""
     return jsonify({'is_authenticated': current_user.is_authenticated})

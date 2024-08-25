@@ -27,11 +27,6 @@ def resize_img(path: str, size: tuple) -> None:
     new_img = img.resize(size)
     new_img.save(path)
 
-def is_today(date_str):
-    if not date_str:
-        return False
-    return datetime.strptime(date_str, '%Y-%m-%d').date() == datetime.utcnow().date()
-
 def download_image(wiki_url):
     """Downloads the main image from wikipedia url"""
 

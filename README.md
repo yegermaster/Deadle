@@ -54,6 +54,7 @@ This rich timeline offers players a chance to guess among more than 6500 histori
 
 ## Technologies Used
 - **Python**: The main programming language used.
+- **JavaScript**: For handling user interactions and actions.
 - **Flask**: For building the web application.
 - **Pandas**: For the database of historical figures.
 - **HTML/CSS**: For the frontend design.

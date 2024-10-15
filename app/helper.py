@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 from flask import url_for
 import cartopy.crs as ccrs
+from urllib.parse import quote
 
 # Set up base directory for handling paths
 BASE_DIR = 'c:/Users/Owner/לימודים/למידה עצמית/תכנות/פייתון/deadle'
@@ -22,32 +23,36 @@ sys.path.append(BASE_DIR)
 from app import app
 
 def resize_img(path: str, size: tuple) -> None:
-    """Resizes and image and save it."""    
+    """Resizes an image and saves it."""    
     img = Image.open(path)
     new_img = img.resize(size)
     new_img.save(path)
 
 def download_image(wiki_url):
-    """Downloads the main image from wikipedia url"""
+    """Downloads the main image from a Wikipedia URL."""
+
+    # URL-encode the wiki_url to handle special characters
+    wiki_url_encoded = quote(wiki_url, safe=':/')
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-        'Referer': wiki_url
+        # Use a standard User-Agent
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
     }
+
     try:
-        response = requests.get(wiki_url, headers=headers, timeout=10)
+        response = requests.get(wiki_url_encoded, headers=headers, timeout=10)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
-        print("Http Error", errh)
+        print("HTTP Error:", errh)
         return
     except requests.exceptions.ConnectionError as errc:
-        print("Connection Error", errc)
+        print("Connection Error:", errc)
         return
     except requests.exceptions.Timeout as errt:
-        print("Timeout Error", errt)
+        print("Timeout Error:", errt)
         return
     except requests.exceptions.RequestException as err:
-        print("Oops: unknown error", err)
+        print("Unknown Error:", err)
         return
 
     if response.status_code != 200:
@@ -57,7 +62,7 @@ def download_image(wiki_url):
     try:
         soup = BeautifulSoup(response.text, 'html.parser')
         infobox = soup.find('table', class_='infobox')
-        image_tag = infobox.find('img') if infobox else soup.find('img') # searching for the imag in the html of the wiki link
+        image_tag = infobox.find('img') if infobox else soup.find('img')  # Search for the image in the HTML
         if not image_tag or not image_tag.get('src'):
             print("No image found")
             return
@@ -68,37 +73,52 @@ def download_image(wiki_url):
             domain = "https://www.wikipedia.org"
             image_url = domain + image_url
 
-        load_wiki_image(image_url, wiki_url, headers) # downloading the image
+        load_wiki_image(image_url)  # Downloading the image
     except (AttributeError, TypeError) as e:
         print(f"An error occurred while processing the image: {e}")
 
-def load_wiki_image(image_url, wiki_url, headers):
-    """Load image from Wikipedia URL and save it locally."""
+def load_wiki_image(image_url):
+    """Loads an image from a Wikipedia URL and saves it locally."""
+
+    # URL-encode the image URL to handle special characters
+    image_url_encoded = quote(image_url, safe=':/')
+
+    headers = {
+        # Use a standard User-Agent
+        'User-Agent': 'Mozilla/5.0 (compatible; DeadleBot/1.0; +http://www.yourwebsite.com/bot)'
+    }
+
     try:
-        image_response = requests.get(image_url, headers=headers, stream=True, timeout=10)
+        image_response = requests.get(image_url_encoded, headers=headers, stream=True, timeout=10)
         image_response.raise_for_status()
 
         base_dir = os.path.abspath('')
         image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
-        image_name = os.path.join(image_path, wiki_url.split('/')[-1]+ '.jpg') # saving the image with its own name
+        
+        # Use a safe filename
+        image_name = os.path.basename(image_url_encoded)
+        image_extension = os.path.splitext(image_name)[1]
+        if not image_extension:
+            image_extension = '.jpg'
+        image_filename = os.path.join(image_path, image_name + image_extension)
 
-        with open(image_name, 'wb') as f:
+        with open(image_filename, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=128):
                 f.write(chunk)
-        print(f"Image successfully downloaded: {image_name}")
+        print(f"Image successfully downloaded: {image_filename}")
     except requests.exceptions.HTTPError as errh:
-        print("Http Error:", errh)
+        print("HTTP Error:", errh)
     except requests.exceptions.ConnectionError as errc:
-        print("Error Connecting:", errc)
+        print("Connection Error:", errc)
     except requests.exceptions.Timeout as errt:
         print("Timeout Error:", errt)
     except requests.exceptions.RequestException as erre:
-        print("Oops: Something Else ", erre)
+        print("Unknown Error:", erre)
 
 def get_cords(city):
-    """Gets a given city lattitude and longtitude"""
+    """Gets a given city's latitude and longitude."""
     url = f"https://nominatim.openstreetmap.org/search?format=json&q={city}&limit=1"
     response = requests.get(url, timeout=10)
     data = response.json()
@@ -109,21 +129,18 @@ def get_cords(city):
     else:
         return None
 
-def icon_img_feedback(icon:str, directory) -> str:
-    """Return a html ready code for a given icon."""
+def icon_img_feedback(icon: str, directory) -> str:
+    """Returns HTML code for a given icon."""
     icon = str(icon)
     icon_filename = icon + '.png'
     icon_path = url_for('static', filename=f'img/icons/{directory}/{icon_filename}')
     icon_image = f"<img src='{icon_path}' alt='{icon}'>"
     return icon_image
 
-def create_text_image(text: str, color: str, directory: str) -> Image:
-    """Create an image with text and save it."""
-    try:
-        if text is None:
-            text = "Unknown"
-    except TypeError as e:
-        print(f'Error {e}')
+def create_text_image(text: str, color: str, directory: str) -> None:
+    """Creates an image with text and saves it."""
+    if not text:
+        text = "Unknown"
 
     img = Image.new('RGB', (150, 75), color='#262A34')
     d = ImageDraw.Draw(img)
@@ -145,28 +162,26 @@ def create_text_image(text: str, color: str, directory: str) -> Image:
 
     thickness = 5
     d.rectangle((0, 0, img.width, img.height), outline=color, width=thickness)
-    print("trying to save")
 
     # Ensure the directory exists
-    os.makedirs(os.path.dirname(directory), exist_ok=True)
+    os.makedirs(directory, exist_ok=True)
 
     # Add the filename with the .png extension
     file_path = os.path.join(directory, f"{text.lower()}_{color}.png")
 
     img.save(file_path)
 
-
-
 def handle_globe_img(filename, color):
-    """Handle the globe image by adding a border and resizing it."""
-    img = Image.open(f'app/static/img/icons/globe/{filename}.png')
+    """Handles the globe image by adding a border and resizing it."""
+    img_path = os.path.join('app', 'static', 'img', 'icons', 'globe', f'{filename}.png')
+    img = Image.open(img_path)
     d = ImageDraw.Draw(img)
-    d.rectangle((0,0, img.width, img.height), outline=color, width=5)
+    d.rectangle((0, 0, img.width, img.height), outline=color, width=5)
     new_img = img.resize((100, 100))
-    new_img.save(f'app/static/img/icons/globe/{filename}.png')
+    new_img.save(img_path)
 
 def plot_location_on_globe(latitude, longitude, filename, color):
-    """Plot the location on a globe and save the image."""
+    """Plots the location on a globe and saves the image."""
     if np.isnan(latitude) or np.isnan(longitude):
         create_text_image('nan', color=color, directory='app/static/img/icons/globe/')
     else:
@@ -174,21 +189,20 @@ def plot_location_on_globe(latitude, longitude, filename, color):
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(longitude, latitude))
         ax.set_global()
         ax.stock_img()
-        ax.plot(longitude, latitude, 'ro',markersize = 10,transform=ccrs.Geodetic())
+        ax.plot(longitude, latitude, 'ro', markersize=10, transform=ccrs.Geodetic())
         ax.figure.patch.set_facecolor('#262A34')
-        save_path = f"app/static/img/icons/globe/{filename}.png"
+        save_path = os.path.join("app", "static", "img", "icons", "globe", f"{filename}.png")
         directory = os.path.dirname(save_path)
         if not os.path.exists(directory):
             os.makedirs(directory)
         plt.savefig(save_path)
+        plt.close(fig)  # Close the figure to free memory
         handle_globe_img(filename, color)
 
 def clear_dir(dir_name):
-    """Delete all files inside the given directory within the static/img directory, without removing subdirectories."""
+    """Deletes all files inside the given directory within the static/img directory, without removing subdirectories."""
     base_dir = os.path.join('app', 'static', 'img')
     dir_path = os.path.join(base_dir, dir_name)
-
-    print(f"Checking directory: {dir_path}")  # Debugging line to check the path
 
     if not os.path.exists(dir_path):
         print(f"The directory {dir_path} does not exist.")

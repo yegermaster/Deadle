@@ -182,8 +182,11 @@ def handle_globe_img(filename, color):
 
 def plot_location_on_globe(latitude, longitude, filename, color):
     """Plots the location on a globe and saves the image."""
+    if not filename:
+        filename = 'unknown'
+
     if np.isnan(latitude) or np.isnan(longitude):
-        create_text_image('nan', color=color, directory='app/static/img/icons/globe/')
+        create_text_image('Unknown', color=color, directory=os.path.join(app.root_path, 'static', 'img', 'icons', 'globe'))
     else:
         fig = plt.figure(figsize=(5, 5), facecolor='#262A34')
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(longitude, latitude))
@@ -198,6 +201,7 @@ def plot_location_on_globe(latitude, longitude, filename, color):
         plt.savefig(save_path)
         plt.close(fig)  # Close the figure to free memory
         handle_globe_img(filename, color)
+    print(f"Plotting location: lat={latitude}, lon={longitude}, filename={filename}, color={color}")
 
 def clear_dir(dir_name):
     """Deletes all files inside the given directory within the static/img directory, without removing subdirectories."""

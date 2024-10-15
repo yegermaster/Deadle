@@ -1,4 +1,8 @@
 /**
+ * script.js
+ */
+
+/**
  * Get elements by ID or class.
  */
 const getById = id => document.getElementById(id);

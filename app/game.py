@@ -48,24 +48,27 @@ def process_guess(guess_name):
     user.num_guesses += 1
     user.current_guess_count += 1
 
+    # Check if the user guessed correctly
     if guessed_row['Name'].upper() == session['target_info']['Name'].upper():
         user.num_games += 1
         user.current_guess_count = 0
         db.session.commit()
         flash('Congratulations! You guessed correctly.', 'success')
-        return redirect(url_for('index'))
 
-    if session['guess_attempts'] >= MAX_ATTEMPTS:
+    # Download and save the image (whether it's a correct guess or the last attempt)
+    wiki_url = session['target_info'].get('Link', '')
+    image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
+    image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
+    if not os.path.exists(image_path) and wiki_url:
+        helper.download_image(wiki_url)
+    session['image_filename'] = image_filename
+
+    # If max attempts reached, reveal the figure and reset the game
+    if session['guess_attempts'] >= MAX_ATTEMPTS or guessed_row['Name'].upper() == session['target_info']['Name'].upper():
         session['reveal'] = True
-        wiki_url = session['target_info'].get('Link', '')
-        image_filename = wiki_url.split('/')[-1] + '.jpg' if wiki_url else 'default.jpg'
-        image_path = os.path.join(app.root_path, 'static', 'img', 'wiki_img', image_filename)
-        if not os.path.exists(image_path) and wiki_url:
-            helper.download_image(wiki_url)
-        session['image_filename'] = image_filename
         user.num_games += 1  # Update the game count here as well
-        db.session.commit()  # Ensure changes are committed to the database
-        return 'Max attempts. Reset to start again'
+        db.session.commit()
+        return 'Max attempts reached. Reset to start again'
 
     db.session.commit()  # Make sure to commit the changes after every modification
     return None
@@ -125,26 +128,27 @@ def get_country_img(guessed_row):
 
 def get_feedback(guessed_row, attribute, icon_dir, create_text=False):
     """Gets the feedback for a specific attribute."""
-    guessed_value = guessed_row[attribute]
-    if isinstance(guessed_value, str):
-        guessed_value = guessed_value.lower()
+    guessed_value = guessed_row.get(attribute)
+    if not guessed_value or (isinstance(guessed_value, float) and np.isnan(guessed_value)):
+        guessed_value = 'unknown'
 
-    chosen_value = session['target_info'][attribute]
-    if isinstance(chosen_value, str):
-        chosen_value = chosen_value.lower()
+    guessed_value = str(guessed_value).lower()
+
+    chosen_value = session['target_info'].get(attribute, '').lower()
 
     color = 'green' if guessed_value == chosen_value else 'red'
-    icon = f'{guessed_value}_{color}' if isinstance(guessed_value, str) else f'{guessed_value}'
+    icon = f'{guessed_value}_{color}'
     icon_path = os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir, f'{icon}.png')
     icon_url = url_for('static', filename=f'img/icons/{icon_dir}/{icon}.png')
     icon_image = f"<img src='{icon_url}' alt='{icon}'>"
 
     if create_text and not os.path.exists(icon_path):
-        helper.create_text_image(str(guessed_value),
-                                  color,
-                                    os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir))
+        helper.create_text_image(guessed_value, color, os.path.join(app.root_path, 'static', 'img', 'icons', icon_dir))
 
+    print(f"guessed_value: {guessed_value}, attribute: {attribute}, icon: {icon}")
     return icon_image
+
+
 
 def clear_imgs():
     """Clears images from directories."""

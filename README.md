@@ -18,14 +18,19 @@ Deadle is a web game inspired by the popular game Wordle, with a twist - players
 
 1. Login
 ![alt text](app/static/img/login.png)
+
 2. Guess the historical figure based on the provided clues.
 ![alt text](app/static/img/guess.png)
+
 2. Use the clues to narrow down your options.
 ![alt text](app/static/img/guess1.png)
+
 3. Submit your guess and see if you’re correct!
 ![alt text](app/static/img/final_result.png)
+
 4. Try to do so with as little tries as possible.
 ![alt text](app/static/img/stats_view.png)
+
 5. If you could do it you won! else, there will be a new historical figure to guess tommorw!
 
 ### Contributing

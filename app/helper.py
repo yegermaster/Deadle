@@ -28,94 +28,64 @@ def resize_img(path: str, size: tuple) -> None:
     new_img = img.resize(size)
     new_img.save(path)
 
-def download_image(wiki_url):
-    """Downloads the main image from a Wikipedia URL."""
-
-    # URL-encode the wiki_url to handle special characters
+def download_image(wiki_url, local_filename):
+    """
+    FInds the Wikipedia page, finds an image, and downloads that image 
+    and saves it.
+    """
     wiki_url_encoded = quote(wiki_url, safe=':/')
-
-    headers = {
-        # Use a standard User-Agent
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)...'}
 
     try:
         response = requests.get(wiki_url_encoded, headers=headers, timeout=10)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as errh:
-        print("HTTP Error:", errh)
-        return
-    except requests.exceptions.ConnectionError as errc:
-        print("Connection Error:", errc)
-        return
-    except requests.exceptions.Timeout as errt:
-        print("Timeout Error:", errt)
-        return
-    except requests.exceptions.RequestException as err:
-        print("Unknown Error:", err)
+    except requests.exceptions.RequestException as e:
+        print(f"Error accessing {wiki_url_encoded}: {e}")
+        return  # Don’t attempt to parse if the page is unavailable
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    infobox = soup.find('table', class_='infobox')
+    image_tag = infobox.find('img') if infobox else soup.find('img')
+    if not image_tag or not image_tag.get('src'):
+        print("No image found in the page.")
         return
 
-    if response.status_code != 200:
-        print("Failed to fetch the webpage")
-        return
+    image_src = image_tag['src']
+    # Handle cases like "//upload.wikimedia.org/..." or "/wiki/..."
+    if image_src.startswith('//'):
+        image_url = 'https:' + image_src
+    elif image_src.startswith('/'):
+        image_url = 'https://www.wikipedia.org' + image_src
+    else:
+        image_url = image_src
 
-    try:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        infobox = soup.find('table', class_='infobox')
-        image_tag = infobox.find('img') if infobox else soup.find('img')  # Search for the image in the HTML
-        if not image_tag or not image_tag.get('src'):
-            print("No image found")
-            return
+    load_wiki_image(image_url, local_filename)
 
-        image_src = image_tag['src']
-        image_url = "https:" + image_src if image_src.startswith("//") else image_src
-        if image_url.startswith("/"):
-            domain = "https://www.wikipedia.org"
-            image_url = domain + image_url
-
-        load_wiki_image(image_url)  # Downloading the image
-    except (AttributeError, TypeError) as e:
-        print(f"An error occurred while processing the image: {e}")
-
-def load_wiki_image(image_url):
-    """Loads an image from a Wikipedia URL and saves it locally."""
-
-    # URL-encode the image URL to handle special characters
+def load_wiki_image(image_url, local_filename):
+    """
+    Actually download the image to your 'wiki_img' folder,
+    using the 'local_filename' you already decided on in process_guess().
+    """
     image_url_encoded = quote(image_url, safe=':/')
-
-    headers = {
-        # Use a standard User-Agent
-        'User-Agent': 'Mozilla/5.0 (compatible; DeadleBot/1.0; +http://www.yourwebsite.com/bot)'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0 (compatible; DeadleBot/1.0; +http://yourwebsite.com/bot)'}
 
     try:
         image_response = requests.get(image_url_encoded, headers=headers, stream=True, timeout=10)
         image_response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to download the image from {image_url_encoded}: {e}")
+        return
 
-        base_dir = os.path.abspath('')
-        image_path = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
-        if not os.path.exists(image_path):
-            os.makedirs(image_path)
-        
-        # Use a safe filename
-        image_name = os.path.basename(image_url_encoded)
-        image_extension = os.path.splitext(image_name)[1]
-        if not image_extension:
-            image_extension = '.jpg'
-        image_filename = os.path.join(image_path, image_name + image_extension)
+    base_dir = os.path.abspath('')
+    save_dir = os.path.join(base_dir, 'app', 'static', 'img', 'wiki_img')
+    os.makedirs(save_dir, exist_ok=True)
 
-        with open(image_filename, 'wb') as f:
-            for chunk in image_response.iter_content(chunk_size=128):
-                f.write(chunk)
-        print(f"Image successfully downloaded: {image_filename}")
-    except requests.exceptions.HTTPError as errh:
-        print("HTTP Error:", errh)
-    except requests.exceptions.ConnectionError as errc:
-        print("Connection Error:", errc)
-    except requests.exceptions.Timeout as errt:
-        print("Timeout Error:", errt)
-    except requests.exceptions.RequestException as erre:
-        print("Unknown Error:", erre)
+    final_path = os.path.join(save_dir, local_filename)
+    with open(final_path, 'wb') as f:
+        for chunk in image_response.iter_content(chunk_size=128):
+            f.write(chunk)
+
+    print(f"Image saved as {final_path}")
 
 def get_cords(city):
     """Gets a given city's latitude and longitude."""

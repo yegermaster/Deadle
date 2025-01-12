@@ -33,9 +33,9 @@ def download_image(wiki_url, local_filename):
     FInds the Wikipedia page, finds an image, and downloads that image 
     and saves it.
     """
+    # URL-encode to handle special characters in Wikipedia links
     wiki_url_encoded = quote(wiki_url, safe=':/')
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)...'}
-
     try:
         response = requests.get(wiki_url_encoded, headers=headers, timeout=10)
         response.raise_for_status()
@@ -43,7 +43,7 @@ def download_image(wiki_url, local_filename):
         print(f"Error accessing {wiki_url_encoded}: {e}")
         return  # Don’t attempt to parse if the page is unavailable
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, 'html.parser') # Converts HTML in response.text into a BeautifulSoup object for easy HTML parsing.
     infobox = soup.find('table', class_='infobox')
     image_tag = infobox.find('img') if infobox else soup.find('img')
     if not image_tag or not image_tag.get('src'):

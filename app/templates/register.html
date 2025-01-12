@@ -1,9 +1,15 @@
-<!-- register.html -->
+<!--
+  register.html
+    - Allows new users to create an account for the Deadle web game.
+    - Submits the username and password to the Flask backend for account creation.
+    - Encourages direct navigation back to the login page if the user already has an account.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
+    <!--Linking a CSS file from the static folder.-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>

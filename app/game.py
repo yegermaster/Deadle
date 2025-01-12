@@ -5,6 +5,7 @@ This module handles the game logic of the Deadle web game.
 import os
 import random
 import pandas as pd
+import numpy as np
 from flask import session, flash, redirect, url_for
 from app import app, helper, db
 from app.models import User
@@ -20,15 +21,18 @@ def load_data():
 my_list, data_frame = load_data()
 
 def initialize_game():
-    """Initializes the game with a random choice."""
+    """Initializes the game by selecting a random row from the DataFrame and storing it in the session as 'target_info'."""
     session['guess_attempts'] = 0
     session['guess_history'] = []
+    # Randomly pick an index in the DataFrame to serve as the "target".
     r = random.randint(0, len(data_frame) - 1)
     dict_data_frame = data_frame.iloc[r].to_dict()
     for k, v in dict_data_frame.items():
         if k in ['countryName', 'continentName', 'occupation']:
             dict_data_frame[k] = v.lower()
     session['target_info'] = dict_data_frame
+    # Prints chosen figure for debugging porpuses
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Chosen figure:", session['target_info']['Name'])
 
 def process_guess(guess_name):
     """Processes a single guess and handles the attempts."""
@@ -38,23 +42,31 @@ def process_guess(guess_name):
 
     session['guess_attempts'] += 1
     guessed_dict = guessed_row.iloc[0].to_dict()
+    # Generate a feedback dictionary (icons, textual hints) for this guess.
     feedback = generate_feedback(guessed_dict)
-
+    # Prevent duplicate guesses from being appended to guess history.
     if not any(guess['name'] == feedback['name'] for guess in session['guess_history']):
         session['guess_history'].append(feedback)
-
     session.modified = True
+    # Update the user's stats in the database, ensuring persistent tracking across sessions.
     user = User.query.get(session['_user_id'])
     user.num_guesses += 1
     user.current_guess_count += 1
 
     # Check if user guessed correctly
     if guessed_dict['Name'].upper() == session['target_info']['Name'].upper():
+        # Update the database through the User instance
+        user.wins += 1
         user.num_games += 1
+        # Reset the current guess count for a fresh start next turn
         user.current_guess_count = 0
+
+        # End session
+        session['reveal'] = True
         db.session.commit()
         flash('Congratulations! You guessed correctly.', 'success')
 
+    # Prepare and store the corresponding image (if any) for this guess or the reveal.
     wiki_url = session['target_info'].get('Link', '')
     if wiki_url:
         raw_name = wiki_url.split('/')[-1]
@@ -69,8 +81,7 @@ def process_guess(guess_name):
         helper.download_image(wiki_url, final_filename)  # calls load_wiki_image()
     else:
         session['image_filename'] = 'default.jpg'
-
-    # If max attempts reached or guessed correctly, reveal the figure
+    # Check win or lose conditions: if out of attempts or guessed correctly, reveal the figure.
     if (
         session['guess_attempts'] >= MAX_ATTEMPTS
         or guessed_dict['Name'].upper() == session['target_info']['Name'].upper()

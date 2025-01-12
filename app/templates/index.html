@@ -1,4 +1,11 @@
-<!-- index.html -->
+<!-- 
+ index.html
+    - Main interface for the game, where users guess and receive feedback. 
+    - Provides user statistics and pages for additional information (About, Help).
+    - Leverages session data (e.g., session['reveal']) to conditionally display the revealed answer.
+    - Employs client-side modals for stats, about, and help sections, enhancing the user experience.
+
+ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,9 +116,10 @@
 
 
         <!-- Reset game button -->
-        {% if guess_history|length >= MAX_ATTEMPTS %}
+        {% if guess_history|length >= MAX_ATTEMPTS or session.get('reveal', False) %}
             <button onclick="window.location.href='/reset';">Reset Game</button>
         {% endif %}
+
 
         <!-- Modal structure -->
         <div id="aboutModal" class="modal">

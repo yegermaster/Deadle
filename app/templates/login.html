@@ -1,9 +1,15 @@
-<!-- logo.html -->
+<!--
+  login.html
+    - Serves as the user interface for logging into the Deadle web game.
+    - Posts username and password to the Flask backend (handled by the '/login' route).
+    - Includes a link to the registration page for users who don't have an account.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <!--Linking a CSS file from the static folder.-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>

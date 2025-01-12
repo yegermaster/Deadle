@@ -23,6 +23,10 @@
         <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="logo">
         <h1>Guess the Historical Figure</h1>
 
+        <div class="logout-container">
+            <a class="logout-btn" href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+
         <!-- About button to open modal -->
         <button id="aboutBtn" style="background: none; border: none; padding: 0;">
             <img src="{{ url_for('static', filename='img/about.png') }}" alt="About" style="width: 100px; height: auto;">
